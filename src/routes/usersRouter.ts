@@ -10,7 +10,7 @@ export const usersRouter = Router({});
 
 export const loginValidationMiddleware = body("login").isString().trim().isLength({ min: 3, max: 10 }).matches("^[a-zA-Z0-9_-]*$").withMessage("Incorrect value for login");
 
-export const passwordValidationMiddleware = body("password").isString().trim().isLength({ min: 1, max: 40 }).withMessage("Incorrect value for password");
+export const passwordValidationMiddleware = body("password").isString().trim().isLength({ min: 6, max: 20 }).withMessage("Incorrect value for password");
 
 export const emailValidationMiddleware = body("email").isString().trim().isLength({ min: 3, max: 40 }).matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$").withMessage("Incorrect value for email");
 
