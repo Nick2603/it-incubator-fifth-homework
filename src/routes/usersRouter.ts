@@ -12,7 +12,7 @@ export const loginValidationMiddleware = body("login").isString().trim().isLengt
 
 export const passwordValidationMiddleware = body("password").isString().trim().isLength({ min: 1, max: 40 }).withMessage("Incorrect value for password");
 
-export const emailValidationMiddleware = body("email").isString().trim().isLength({ min: 3, max: 10 }).matches("^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").withMessage("Incorrect value for email");
+export const emailValidationMiddleware = body("email").isString().trim().isLength({ min: 3, max: 40 }).matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$").withMessage("Incorrect value for email");
 
 usersRouter.get('/', authMiddleware, async (req: Request, res: Response) => {
   const searchLoginTerm = req.query.searchLoginTerm;
