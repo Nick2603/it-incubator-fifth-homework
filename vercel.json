@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "express-videos-vercel",
+  "name": "express-blogs-app-vercel",
   "builds": [
     {
       "src": "src/index.ts",
