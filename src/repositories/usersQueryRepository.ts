@@ -22,13 +22,22 @@ interface IGetUsersInput {
 
 export const usersQueryRepository = {
   async getUsers({searchLoginTerm, searchEmailTerm, sortBy = "createdAt", sortDirection = "desc", pageNumber = "1", pageSize = "10"}: IGetUsersInput): Promise<UsersWithMetaType> {
-    const filter: any = {};
+    let filter: any = {};
 
-    if (searchLoginTerm) {
+    if (searchLoginTerm && searchEmailTerm) {
+      filter = {
+        $or: [
+         { login: { $regex: `(?i)${searchLoginTerm}(?-i)` } },
+         { email: { $regex: `(?i)${searchEmailTerm}(?-i)` } }
+       ]
+     }
+    }
+
+    if (searchLoginTerm && !searchEmailTerm) {
       filter.login = { $regex: `(?i)${searchLoginTerm}(?-i)` };
     };
 
-    if (searchEmailTerm) {
+    if (searchEmailTerm && !searchLoginTerm) {
       filter.email = { $regex: `(?i)${searchEmailTerm}(?-i)` };
     };
 
