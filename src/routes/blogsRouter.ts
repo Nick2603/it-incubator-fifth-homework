@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { basicAuthMiddleware } from "../middlewares/basicAuthMiddleware";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { blogsService } from "../domains/blogsService";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
@@ -38,7 +38,7 @@ blogsRouter.get('/:id', async (req: Request, res: Response) => {
 });
 
 blogsRouter.post('/',
-  authMiddleware,
+  basicAuthMiddleware,
   nameValidationMiddleware,
   descriptionValidationMiddleware,
   websiteUrlValidationMiddleware,
@@ -54,7 +54,7 @@ blogsRouter.post('/',
 );
 
 blogsRouter.put('/:id',
-  authMiddleware,
+  basicAuthMiddleware,
   nameValidationMiddleware,
   descriptionValidationMiddleware,
   websiteUrlValidationMiddleware,
@@ -74,13 +74,13 @@ blogsRouter.put('/:id',
   }
 );
 
-blogsRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+blogsRouter.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
   const id = req.params.id;
   const result = await blogsService.deleteBlog(id);
   if (result) {
     res.sendStatus(CodeResponsesEnum.No_content_204);
     return;
-  }
+  };
   res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
 
@@ -96,27 +96,28 @@ blogsRouter.get('/:blogId/posts', async (req: Request, res: Response) => {
     const posts = await postsQueryRepository.getPosts({title, sortBy, sortDirection, pageNumber, pageSize, blogId});
     res.status(200).send(posts);
     return;
-  }
+  };
   res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
 
 blogsRouter.post('/:blogId/posts',
-authMiddleware,
-titleValidationMiddleware,
-shortDescriptionValidationMiddleware,
-contentDescriptionValidationMiddleware,
-inputValidationMiddleware,
-async (req: Request, res: Response) => {
-  const blogId = req.params.blogId;
-  const blog = await blogsService.getBlogById(blogId);
-  if (blog) {
-    const title = req.body.title;
-    const shortDescription = req.body.shortDescription;
-    const content = req.body.content;
+  basicAuthMiddleware,
+  titleValidationMiddleware,
+  shortDescriptionValidationMiddleware,
+  contentDescriptionValidationMiddleware,
+  inputValidationMiddleware,
+  async (req: Request, res: Response) => {
+    const blogId = req.params.blogId;
+    const blog = await blogsService.getBlogById(blogId);
+    if (blog) {
+      const title = req.body.title;
+      const shortDescription = req.body.shortDescription;
+      const content = req.body.content;
 
-    const newPost = await postsService.createPost(title, shortDescription, content, blogId);
-    res.status(CodeResponsesEnum.Created_201).send(newPost);
-    return;
+      const newPost = await postsService.createPost(title, shortDescription, content, blogId);
+      res.status(CodeResponsesEnum.Created_201).send(newPost);
+      return;
+    };
+    res.sendStatus(CodeResponsesEnum.Not_found_404);
   }
-  res.sendStatus(CodeResponsesEnum.Not_found_404);
-});
+);

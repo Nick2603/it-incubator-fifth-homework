@@ -7,6 +7,10 @@ export const usersService = {
     await usersRepository.deleteAllUsers();
   },
 
+  async getUserById(id: string): Promise<IUser | null> {
+    return await usersRepository.getUserById(id);
+  },
+
   async createUser(login: string, email: string, password: string): Promise<IUser> {
     const passwordSalt = await bcrypt.genSalt(10);
     const passwordHash = await this._generateHash(password, passwordSalt);
@@ -33,11 +37,14 @@ export const usersService = {
     return await usersRepository.deleteUser(id);
   },
 
-  async checkCredentials(loginOrEmail: string, password: string): Promise<boolean> {
+  async checkCredentials(loginOrEmail: string, password: string): Promise<IUser | null> {
     const user = await usersRepository.findByLoginOrEmail(loginOrEmail);
-    if (!user) return false;
+    if (!user) return null;
     const comparePasswordsResult = await bcrypt.compare(password, user.password!);
-    return comparePasswordsResult;
+    if (comparePasswordsResult) {
+      return user;
+    }
+    return null;
   },
 
   async _generateHash(password: string, salt: string) {

@@ -7,6 +7,10 @@ export const usersRepository = {
     await usersCollection.deleteMany({});
   },
 
+  async getUserById(id: string): Promise<IUser | null> {
+    return await usersCollection.findOne({ id }, { projection: { _id: 0 }});
+  },
+
   async findByLoginOrEmail(loginOrEmail: string): Promise<WithId<IUser> | null> {
     const user = await usersCollection.findOne({ $or: [{ email: loginOrEmail }, { login: loginOrEmail }]});
     return user;

@@ -1,0 +1,23 @@
+import { NextFunction, Request, Response } from "express";
+import { jwtService } from "../application/jwtService";
+import { usersService } from "../domains/usersService";
+import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
+import { IUser } from "../types/IUser";
+
+export const jwtAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.headers.authorization) {
+    res.sendStatus(CodeResponsesEnum.Unauthorized_401);
+    return;
+  };
+
+  const token = req.headers.authorization.split(" ")[1];
+  const userId = await jwtService.getUserIdByToken(token);
+
+  if (!userId) {
+    res.sendStatus(CodeResponsesEnum.Unauthorized_401);
+    return;
+  };
+
+  req.user = await usersService.getUserById(userId) as IUser;
+  next();
+};

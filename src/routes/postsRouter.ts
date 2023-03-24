@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { basicAuthMiddleware } from "../middlewares/basicAuthMiddleware";
 import { isValidBlogId } from "../middlewares/blogIdValidationMiddleware";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { postsService } from "../domains/postsService";
@@ -38,7 +38,7 @@ postsRouter.get('/:id', async (req: Request, res: Response) => {
 });
 
 postsRouter.post('/',
-  authMiddleware,
+  basicAuthMiddleware,
   titleValidationMiddleware,
   shortDescriptionValidationMiddleware,
   contentDescriptionValidationMiddleware,
@@ -56,7 +56,7 @@ postsRouter.post('/',
 );
 
 postsRouter.put('/:id',
-  authMiddleware,
+  basicAuthMiddleware,
   titleValidationMiddleware,
   shortDescriptionValidationMiddleware,
   contentDescriptionValidationMiddleware,
@@ -78,7 +78,7 @@ postsRouter.put('/:id',
   }
 );
 
-postsRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+postsRouter.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
   const id = req.params.id;
   const result = await postsService.deletePost(id);
   if (result) {

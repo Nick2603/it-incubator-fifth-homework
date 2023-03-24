@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { usersService } from "../domains/usersService";
-import { authMiddleware } from "../middlewares/authMiddleware";
+import { basicAuthMiddleware } from "../middlewares/basicAuthMiddleware";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { usersQueryRepository } from "../repositories/usersQueryRepository";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
@@ -14,7 +14,7 @@ export const passwordValidationMiddleware = body("password").isString().trim().i
 
 export const emailValidationMiddleware = body("email").isString().trim().isLength({ min: 3, max: 40 }).matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$").withMessage("Incorrect value for email");
 
-usersRouter.get('/', authMiddleware, async (req: Request, res: Response) => {
+usersRouter.get('/', basicAuthMiddleware, async (req: Request, res: Response) => {
   const searchLoginTerm = req.query.searchLoginTerm;
   const searchEmailTerm = req.query.searchEmailTerm;
   const sortBy = req.query.sortBy;
@@ -26,7 +26,7 @@ usersRouter.get('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 usersRouter.post('/',
-  authMiddleware,
+  basicAuthMiddleware,
   loginValidationMiddleware,
   passwordValidationMiddleware,
   emailValidationMiddleware,
@@ -41,7 +41,7 @@ usersRouter.post('/',
   }
 );
 
-usersRouter.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+usersRouter.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
   const id = req.params.id;
   const result = await usersService.deleteUser(id);
   if (result) {
