@@ -1,7 +1,6 @@
 import { Router, Request, Response } from "express";
 import { body, param } from "express-validator";
 import { commentsService } from "../domains/commentsService";
-import { isValidCommentId } from "../middlewares/commentIdValidationMiddleware";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
@@ -9,8 +8,6 @@ import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 export const commentsRouter = Router({});
 
 export const contentValidationMiddleware = body("content").isString().trim().isLength({ min: 20, max: 300 }).withMessage("Incorrect value for content");
-
-const commentIdValidationMiddleware = param("commentId").custom(isValidCommentId);
 
 commentsRouter.get('/:commentId', async (req: Request, res: Response) => {
   const commentId = req.params.commentId;
@@ -24,7 +21,6 @@ commentsRouter.get('/:commentId', async (req: Request, res: Response) => {
 
 commentsRouter.put('/:commentId',
   jwtAuthMiddleware,
-  commentIdValidationMiddleware,
   contentValidationMiddleware,
   inputValidationMiddleware,
   async (req: Request, res: Response) => {

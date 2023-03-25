@@ -35,6 +35,7 @@ export const commentsService = {
 
   async updateComment(commentId: string, content: string, userId: string): Promise<"Updated" | "Forbidden" | "Not found"> {
     const comment = await commentsRepository.getCommentById(commentId);
+    if (!comment) return "Not found";
     if (comment?.commentatorInfo.userId !== userId) return "Forbidden";
     const updateResult = await commentsRepository.updateComment(commentId, content);
     if (!updateResult) return "Not found";
