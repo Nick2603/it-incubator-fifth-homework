@@ -43,6 +43,7 @@ export const commentsService = {
 
   async deleteComment(commentId: string, userId: string): Promise<"Updated" | "Forbidden" | "Not found"> {
     const comment = await commentsRepository.getCommentById(commentId);
+    if (!comment) return "Not found";
     if (comment?.commentatorInfo.userId !== userId) return "Forbidden";
     const updateResult =  await commentsRepository.deleteComment(commentId);
     if (!updateResult) return "Not found";
