@@ -6,6 +6,10 @@ import { inputValidationMiddleware } from "../middlewares/inputValidationMiddlew
 import { postsService } from "../domains/postsService";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { postsQueryRepository } from "../repositories/postsQueryRepository";
+import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
+import { contentValidationMiddleware } from "./commentsRouter";
+import { commentsService } from "../domains/commentsService";
+import { commentsQueryRepository } from "../repositories/commentsQueryRepository";
 
 export const postsRouter = Router({});
 
@@ -87,3 +91,39 @@ postsRouter.delete('/:id', basicAuthMiddleware, async (req: Request, res: Respon
   }
   res.sendStatus(CodeResponsesEnum.Not_found_404);
 });
+
+postsRouter.get('/:postId/comments', async (req: Request, res: Response) => {
+  const postId = req.params.postId;
+  const post = await postsService.getPostById(postId);
+  if (!post) {
+    res.sendStatus(CodeResponsesEnum.Not_found_404);
+    return;
+  };
+
+  const sortBy = req.query.sortBy;
+  const sortDirection = req.query.sortDirection;
+  const pageNumber = req.query.pageNumber;
+  const pageSize = req.query.pageSize;
+  const comments = await commentsQueryRepository.getComments(sortBy, sortDirection, pageNumber, pageSize, postId);
+  res.status(200).send(comments);
+});
+
+postsRouter.post('/:postId/comments',
+  jwtAuthMiddleware,
+  contentValidationMiddleware,
+  inputValidationMiddleware,
+  async (req: Request, res: Response) => {
+    const postId = req.params.postId;
+    const post = await postsService.getPostById(postId);
+    if (!post) {
+      res.sendStatus(CodeResponsesEnum.Not_found_404);
+      return;
+    };
+
+    const userId = req.user!.id;
+    const content = req.body.content;
+
+    const newComment = await commentsService.createComment(content, postId, userId);
+    res.status(CodeResponsesEnum.Created_201).send(newComment);
+  }
+);

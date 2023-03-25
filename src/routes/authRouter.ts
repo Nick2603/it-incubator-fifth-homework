@@ -26,7 +26,7 @@ authRouter.post('/login',
     }
     
     const token = await jwtService.createJWT(user);
-    res.status(CodeResponsesEnum.Ok_200).send({ accessToken: token });
+    res.status(CodeResponsesEnum.Ok_200).send(token);
   }
 );
 

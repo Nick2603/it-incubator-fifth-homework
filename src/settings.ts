@@ -8,6 +8,8 @@ import { CodeResponsesEnum } from "./types/CodeResponsesEnum";
 import { usersRouter } from "./routes/usersRouter";
 import { usersRepository } from "./repositories/usersRepository";
 import { authRouter } from "./routes/authRouter";
+import { commentsRouter } from "./routes/commentsRouter";
+import { commentsRepository } from "./repositories/commentsRepository";
 
 export const app = express();
 
@@ -21,6 +23,7 @@ app.delete('/testing/all-data', async (req: Request, res: Response) => {
   await blogsRepository.deleteAllBlogs();
   await postsRepository.deleteAllPosts();
   await usersRepository.deleteAllUsers();
+  await commentsRepository.deleteAllComments();
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
 
@@ -28,3 +31,4 @@ app.use("/blogs", blogsRouter);
 app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
+app.use("/comments", commentsRouter);
