@@ -21,24 +21,24 @@ interface IGetUsersInput {
 }
 
 export const usersQueryRepository = {
-  async getUsers({searchLoginTerm, searchEmailTerm, sortBy = "createdAt", sortDirection = "desc", pageNumber = "1", pageSize = "10"}: IGetUsersInput): Promise<UsersWithMetaType> {
+  async getUsers({searchLoginTerm, searchEmailTerm, sortBy = "accountData.createdAt", sortDirection = "desc", pageNumber = "1", pageSize = "10"}: IGetUsersInput): Promise<UsersWithMetaType> {
     let filter: any = {};
 
     if (searchLoginTerm && searchEmailTerm) {
       filter = {
         $or: [
-         { login: { $regex: `(?i)${searchLoginTerm}(?-i)` } },
-         { email: { $regex: `(?i)${searchEmailTerm}(?-i)` } }
+         { "accountData.login": { $regex: `(?i)${searchLoginTerm}(?-i)` } },
+         { "accountData.email": { $regex: `(?i)${searchEmailTerm}(?-i)` } }
        ]
      }
     }
 
     if (searchLoginTerm && !searchEmailTerm) {
-      filter.login = { $regex: `(?i)${searchLoginTerm}(?-i)` };
+      filter["accountData.login"] = { $regex: `(?i)${searchLoginTerm}(?-i)` };
     };
 
     if (searchEmailTerm && !searchLoginTerm) {
-      filter.email = { $regex: `(?i)${searchEmailTerm}(?-i)` };
+      filter["accountData.email"] = { $regex: `(?i)${searchEmailTerm}(?-i)` };
     };
 
     const totalCount =  await usersCollection.countDocuments(filter);

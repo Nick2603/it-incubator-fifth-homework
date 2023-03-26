@@ -8,8 +8,15 @@ export const usersRepository = {
   },
 
   async getUserById(id: string): Promise<IUserViewModel | null> {
-    const foundUser = await usersCollection.findOne({ id });
+    let userId: any;
+    try {
+      userId = new ObjectId(id);
+    } catch (error) {
+      return null;
+    };
+    const foundUser = await usersCollection.findOne({ _id: userId });
     if (!foundUser) return null;
+    
     return {
       id: foundUser._id,
       login: foundUser.accountData.login,
@@ -19,7 +26,14 @@ export const usersRepository = {
   },
 
   async getUserDBModelById(id: string): Promise<IUserDBModel | null> {
-    return  usersCollection.findOne({ id });
+    let userId: any;
+    try {
+      userId = new ObjectId(id);
+    } catch (error) {
+      return null;
+    };
+    
+    return usersCollection.findOne({ _id: userId });
   },
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<IUserDBModel | null> {
@@ -31,7 +45,12 @@ export const usersRepository = {
   },
 
   async deleteUser(id: string): Promise<boolean> {
-    const userId = new ObjectId(id);
+    let userId: any;
+    try {
+      userId = new ObjectId(id);
+    } catch (error) {
+      return false;
+    };
     const result = await usersCollection.deleteOne({ _id: userId })
     return result.deletedCount === 1;
   },
