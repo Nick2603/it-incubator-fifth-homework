@@ -53,8 +53,10 @@ export const usersService = {
 
   async checkCredentials(loginOrEmail: string, password: string): Promise<IUserViewModel | null> {
     const user = await usersRepository.findByLoginOrEmail(loginOrEmail);
+    
     if (!user) return null;
     const comparePasswordsResult = await bcrypt.compare(password, user.accountData.password);
+    
     if (comparePasswordsResult) {
       return {
         id: user._id,

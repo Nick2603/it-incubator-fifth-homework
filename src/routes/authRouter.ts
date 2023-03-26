@@ -20,7 +20,7 @@ authRouter.post('/login',
   async (req: Request, res: Response) => {
     const loginOrEmail = req.body.loginOrEmail;
     const password = req.body.password;
-    const user = await usersService.checkCredentials(loginOrEmail, password);
+    const user = await usersService.checkCredentials(loginOrEmail, password);    
 
     if (!user) {
       res.sendStatus(CodeResponsesEnum.Unauthorized_401);

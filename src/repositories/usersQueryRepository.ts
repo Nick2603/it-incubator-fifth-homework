@@ -42,7 +42,7 @@ export const usersQueryRepository = {
     };
 
     const totalCount =  await usersCollection.countDocuments(filter);
-    const users = await usersCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IUserDBModel>({ _id: 0, password: 0 }).toArray();
+    const users = await usersCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IUserDBModel>({ password: 0 }).toArray();
 
     return {
       pagesCount: Math.ceil(totalCount / +pageSize),

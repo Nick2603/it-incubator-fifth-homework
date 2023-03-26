@@ -1,4 +1,4 @@
-import { InsertOneResult } from "mongodb";
+import { InsertOneResult, ObjectId } from "mongodb";
 import { usersCollection } from "../db";
 import { IUserViewModel, IUserDBModel } from "../types/IUser";
 
@@ -23,7 +23,7 @@ export const usersRepository = {
   },
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<IUserDBModel | null> {
-    return await usersCollection.findOne({ $or: [{ email: loginOrEmail }, { login: loginOrEmail }]});
+    return await usersCollection.findOne({ $or: [{ "accountData.email": loginOrEmail }, { "accountData.login": loginOrEmail }]});
   },
 
   async createUser(newUser: IUserDBModel): Promise<InsertOneResult<IUserDBModel>> {
@@ -31,7 +31,8 @@ export const usersRepository = {
   },
 
   async deleteUser(id: string): Promise<boolean> {
-    const result = await usersCollection.deleteOne({ id })
+    const userId = new ObjectId(id);
+    const result = await usersCollection.deleteOne({ _id: userId })
     return result.deletedCount === 1;
   },
 };
