@@ -120,7 +120,7 @@ postsRouter.post('/:postId/comments',
       return;
     };
 
-    const userId = req.user!.id;
+    const userId = req.user!._id.toString();
     const content = req.body.content;
 
     const newComment = await commentsService.createComment(content, postId, userId);

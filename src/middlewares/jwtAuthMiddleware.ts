@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { jwtService } from "../application/jwtService";
 import { usersService } from "../domains/usersService";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
-import { IUser } from "../types/IUser";
+import { IUserDBModel } from "../types/IUser";
 
 export const jwtAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   if (!req.headers.authorization) {
@@ -18,6 +18,6 @@ export const jwtAuthMiddleware = async (req: Request, res: Response, next: NextF
     return;
   };
 
-  req.user = await usersService.getUserById(userId) as IUser;
+  req.user = await usersService.getUserDBModelById(userId) as IUserDBModel;
   next();
 };

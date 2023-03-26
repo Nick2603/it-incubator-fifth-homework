@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
-import { IUser } from "../types/IUser";
-import { ObjectId } from "mongodb";
+import { IUserViewModel } from "../types/IUser";
 
 export const jwtService = {
-  async createJWT(user: IUser) {
+  async createJWT(user: IUserViewModel) {
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: "1h" });
     return {
       accessToken: token,

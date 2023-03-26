@@ -1,6 +1,6 @@
 import { SortDirection } from "mongodb";
 import { usersCollection } from "../db";
-import { IUser } from "../types/IUser";
+import { IUserDBModel, IUserViewModel } from "../types/IUser";
 import { QueryParamType } from "../types/QueryParamType";
 
 type UsersWithMetaType = {
@@ -8,7 +8,7 @@ type UsersWithMetaType = {
   page: number,
   pageSize: number,
   totalCount: number,
-  items: IUser[],
+  items: IUserViewModel[],
 }
 
 interface IGetUsersInput {
@@ -42,14 +42,19 @@ export const usersQueryRepository = {
     };
 
     const totalCount =  await usersCollection.countDocuments(filter);
-    const users = await usersCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IUser>({ _id: 0, password: 0 }).toArray();
+    const users = await usersCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IUserDBModel>({ _id: 0, password: 0 }).toArray();
 
     return {
       pagesCount: Math.ceil(totalCount / +pageSize),
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount,
-      items: users,
+      items: users.map(user => ({
+        id: user._id,
+        login: user.accountData.login,
+        email: user.accountData.email,
+        createdAt: user.accountData.createdAt,
+      })),
     }
   },
 };

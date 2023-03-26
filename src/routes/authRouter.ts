@@ -1,3 +1,4 @@
+import { emailAdapter } from './../adapters/emailAdapter';
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { jwtService } from "../application/jwtService";
@@ -6,6 +7,7 @@ import { inputValidationMiddleware } from "../middlewares/inputValidationMiddlew
 import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { passwordValidationMiddleware } from "./usersRouter";
+import { authService } from '../domains/authService';
 
 export const authRouter = Router({});
 
@@ -31,5 +33,24 @@ authRouter.post('/login',
 );
 
 authRouter.get('/me', jwtAuthMiddleware, async (req: Request, res: Response) => {
-  res.send({ email: req.user!.email, login: req.user!.login, userId: req.user!.id });
+  res.send({ email: req.user!.accountData.email, login: req.user!.accountData.login, userId: req.user!._id });
 });
+
+authRouter.post('/registration', async(req: Request, res: Response) => {
+  const login = req.body.login;
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const user = await authService.createUser(login, email, password);
+  res.send(user);
+});
+
+// authRouter.post('/test', async(req: Request, res: Response) => {
+//   const to = req.body.email;
+//   const subject = req.body.subject;
+//   const html = req.body.message;
+    
+//   await emailAdapter.sendEmail(to, subject, html)
+
+//   res.send("T");
+// });
