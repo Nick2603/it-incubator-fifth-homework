@@ -22,6 +22,11 @@ interface IGetUsersInput {
 
 export const usersQueryRepository = {
   async getUsers({searchLoginTerm, searchEmailTerm, sortBy = "accountData.createdAt", sortDirection = "desc", pageNumber = "1", pageSize = "10"}: IGetUsersInput): Promise<UsersWithMetaType> {
+
+    if (sortBy !== "accountData.createdAt" && sortBy.length) {
+      sortBy = `accountData.${sortBy}`;
+    };
+
     let filter: any = {};
 
     if (searchLoginTerm && searchEmailTerm) {
