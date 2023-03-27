@@ -1,31 +1,13 @@
 import { InsertOneResult, ObjectId } from "mongodb";
 import { usersCollection } from "../db";
-import { IUserViewModel, IUserDBModel } from "../types/IUser";
+import { IUserDBModel } from "../types/IUser";
 
 export const usersRepository = {
   async deleteAllUsers(): Promise<void> {
     await usersCollection.deleteMany({});
   },
 
-  async getUserById(id: string): Promise<IUserViewModel | null> {
-    let userId: any;
-    try {
-      userId = new ObjectId(id);
-    } catch (error) {
-      return null;
-    };
-    const foundUser = await usersCollection.findOne({ _id: userId });
-    if (!foundUser) return null;
-    
-    return {
-      id: foundUser._id,
-      login: foundUser.accountData.login,
-      email: foundUser.accountData.email,
-      createdAt: foundUser.accountData.createdAt,
-    };
-  },
-
-  async getUserDBModelById(id: string): Promise<IUserDBModel | null> {
+  async getUserById(id: string): Promise<IUserDBModel | null> {
     let userId: any;
     try {
       userId = new ObjectId(id);

@@ -1,5 +1,4 @@
 import { commentsRepository } from "../repositories/commentsRepository";
-import { postsRepository } from "../repositories/postsRepository";
 import { usersRepository } from "../repositories/usersRepository";
 import { IComment } from "../types/IComment";
 
@@ -20,7 +19,7 @@ export const commentsService = {
       content,
       commentatorInfo: {
         userId,
-        userLogin: user!.login,
+        userLogin: user!.accountData.login,
       },
       createdAt: new Date().toISOString(),
     };

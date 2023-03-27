@@ -10,12 +10,8 @@ export const usersService = {
     await usersRepository.deleteAllUsers();
   },
 
-  async getUserById(id: string): Promise<IUserViewModel | null> {
-    return await usersRepository.getUserById(id);
-  },
-
   async getUserDBModelById(id: string): Promise<IUserDBModel | null> {
-    return await usersRepository.getUserDBModelById(id);
+    return await usersRepository.getUserById(id);
   },
 
   async getUserByEmailConfirmationCode(code: string): Promise<IUserDBModel | null> {
