@@ -36,7 +36,7 @@ usersRouter.post('/',
     const password = req.body.password;
     const email = req.body.email;
 
-    const newUser = await usersService.createUser(login, email, password);
+    const newUser = await usersService.createUser(login, email, password, true);
     res.status(CodeResponsesEnum.Created_201).send(newUser);
   }
 );

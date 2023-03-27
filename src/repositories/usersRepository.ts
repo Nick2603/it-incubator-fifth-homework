@@ -36,8 +36,20 @@ export const usersRepository = {
     return usersCollection.findOne({ _id: userId });
   },
 
+  async getUserByEmailConfirmationCode(code: string): Promise<IUserDBModel | null> {  
+    return usersCollection.findOne({ "emailConfirmation.confirmationCode": code });
+  },
+
   async findByLoginOrEmail(loginOrEmail: string): Promise<IUserDBModel | null> {
     return await usersCollection.findOne({ $or: [{ "accountData.email": loginOrEmail }, { "accountData.login": loginOrEmail }]});
+  },
+
+  async getUserByEmail(email: string): Promise<IUserDBModel | null> {  
+    return usersCollection.findOne({ "accountData.email": email });
+  },
+
+  async getUserByLogin(login: string): Promise<IUserDBModel | null> {  
+    return usersCollection.findOne({ "accountData.login": login });
   },
 
   async createUser(newUser: IUserDBModel): Promise<InsertOneResult<IUserDBModel>> {
@@ -53,5 +65,10 @@ export const usersRepository = {
     };
     const result = await usersCollection.deleteOne({ _id: userId })
     return result.deletedCount === 1;
+  },
+
+  async confirmEmail(userId: ObjectId) {
+    let result = await usersCollection.updateOne({ _id: userId }, { $set: { "emailConfirmation.isConfirmed": true } });
+    return result.modifiedCount === 1;
   },
 };

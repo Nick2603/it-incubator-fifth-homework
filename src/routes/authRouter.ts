@@ -1,17 +1,20 @@
-import { emailAdapter } from './../adapters/emailAdapter';
 import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { jwtService } from "../application/jwtService";
-import { usersService } from "../domains/usersService";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
-import { passwordValidationMiddleware } from "./usersRouter";
+import { emailValidationMiddleware, loginValidationMiddleware, passwordValidationMiddleware } from "./usersRouter";
 import { authService } from '../domains/authService';
+import { isUniqueEmail } from "../middlewares/isUniqueEmailMiddleware";
 
 export const authRouter = Router({});
 
 export const loginOrEmailValidationMiddleware = body("loginOrEmail").isString().trim().isLength({ min: 1, max: 40 }).withMessage("Incorrect value for loginOrEmail");
+
+export const codeValidationMiddleware = body("code").isString().trim().isLength({ min: 1, max: 500 }).withMessage("Incorrect value for code");
+
+const emailUniquenessValidationMiddleware = body("blogId").custom(isUniqueEmail);
 
 authRouter.post('/login',
   loginOrEmailValidationMiddleware,
@@ -20,7 +23,7 @@ authRouter.post('/login',
   async (req: Request, res: Response) => {
     const loginOrEmail = req.body.loginOrEmail;
     const password = req.body.password;
-    const user = await usersService.checkCredentials(loginOrEmail, password);    
+    const user = await authService.checkCredentials(loginOrEmail, password);    
 
     if (!user) {
       res.sendStatus(CodeResponsesEnum.Unauthorized_401);
@@ -36,21 +39,39 @@ authRouter.get('/me', jwtAuthMiddleware, async (req: Request, res: Response) => 
   res.send({ email: req.user!.accountData.email, login: req.user!.accountData.login, userId: req.user!._id });
 });
 
-authRouter.post('/registration', async(req: Request, res: Response) => {
-  const login = req.body.login;
+authRouter.post('/registration',
+  emailUniquenessValidationMiddleware,
+  loginValidationMiddleware,
+  passwordValidationMiddleware,
+  emailValidationMiddleware,
+  inputValidationMiddleware,
+  async(req: Request, res: Response) => {
+    const login = req.body.login;
+    const email = req.body.email;
+    const password = req.body.password;
+
+    const result = await authService.createUser(login, email, password);
+    if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+    res.sendStatus(CodeResponsesEnum.No_content_204);
+  }
+);
+
+authRouter.post('/registration-confirmation',
+  codeValidationMiddleware,
+  inputValidationMiddleware,
+  async(req: Request, res: Response) => {
+    const code = req.body.code;
+
+    const result = await authService.confirmEmail(code);
+    if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+    res.sendStatus(CodeResponsesEnum.No_content_204);
+  }
+);
+
+authRouter.post('/registration-email-resending', emailValidationMiddleware, async(req: Request, res: Response) => {
   const email = req.body.email;
-  const password = req.body.password;
 
-  const user = await authService.createUser(login, email, password);
-  res.send(user);
+  const result = await authService.resendEmail(email);
+  if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+  res.sendStatus(CodeResponsesEnum.No_content_204);
 });
-
-// authRouter.post('/test', async(req: Request, res: Response) => {
-//   const to = req.body.email;
-//   const subject = req.body.subject;
-//   const html = req.body.message;
-    
-//   await emailAdapter.sendEmail(to, subject, html)
-
-//   res.send("T");
-// });
