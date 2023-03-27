@@ -24,11 +24,13 @@ export const authService = {
   
     const user = await usersRepository.getUserByEmail(email);
     if (!user) {
-      return errors.errorsMessages.push({ message: "user is not found", field: "email" });
+      errors.errorsMessages.push({ message: "user is not found", field: "email" });
+      return errors;
     };
   
     if (user.emailConfirmation.isConfirmed) {
-      return errors.errorsMessages.push({ message: "email is already confirmed", field: "email" });
+      errors.errorsMessages.push({ message: "email is already confirmed", field: "email" });
+      return errors;
     };
 
     const newConfirmationCode = uuidv4();
@@ -56,11 +58,13 @@ export const authService = {
     const user = await usersService.getUserByEmailConfirmationCode(code);
 
     if (!user) {
-      return errors.errorsMessages.push({ message: "invalid code", field: "code" });
+      errors.errorsMessages.push({ message: "invalid code", field: "code" });
+      return errors;
     };
 
     if (user.emailConfirmation.isConfirmed) {
-      return errors.errorsMessages.push({ message: "email is already confirmed", field: "code" });
+      errors.errorsMessages.push({ message: "email is already confirmed", field: "code" });
+      return errors;
     };
 
     if (user.emailConfirmation.expirationDate < new Date()) return false;
