@@ -4,6 +4,7 @@ import { usersRepository } from './../repositories/usersRepository';
 import { emailsManager } from "../utils/emailsManager";
 import { usersService } from "./usersService";
 import { IUserViewModel } from '../types/IUser';
+import { ErrorsType } from "../types/ErrorsType";
 
 export const authService = {
   async createUser(login: string, email: string, password: string): Promise<boolean> {
@@ -19,10 +20,11 @@ export const authService = {
     return true;
   },
 
-  async resendEmail(email: string): Promise<any> {
-    const errors: any = { errorsMessages: [] };
+  async resendEmail(email: string): Promise<boolean | ErrorsType> {
+    const errors: ErrorsType = { errorsMessages: [] };
   
     const user = await usersRepository.getUserByEmail(email);
+  
     if (!user) {
       errors.errorsMessages.push({ message: "user is not found", field: "email" });
       return errors;
@@ -52,8 +54,8 @@ export const authService = {
     return true;
   },
 
-  async confirmEmail(code: string): Promise<any> {
-    const errors: any = { errorsMessages: [] };
+  async confirmEmail(code: string): Promise<boolean | ErrorsType> {
+    const errors: ErrorsType = { errorsMessages: [] };
   
     const user = await usersService.getUserByEmailConfirmationCode(code);
 
@@ -63,16 +65,16 @@ export const authService = {
     };
 
     if (user.emailConfirmation.isConfirmed) {
-      errors.errorsMessages.push({ message: "email is already confirmed", field: "code" });
+      errors.errorsMessages.push({ message: "invalid code", field: "code" });
       return errors;
     };
 
-    if (user.emailConfirmation.expirationDate < new Date()) return false;
+    if (user.emailConfirmation.expirationDate < new Date()) {
+      errors.errorsMessages.push({ message: "invalid code", field: "code" });
+      return errors;
+    };
+
     const result = await usersRepository.confirmEmail(user._id);
-
-    if (errors.errorsMessages.length) {
-      return errors;
-    };
   
     return result;
   },

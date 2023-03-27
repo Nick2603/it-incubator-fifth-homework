@@ -68,7 +68,7 @@ authRouter.post('/registration-confirmation',
 
     const result = await authService.confirmEmail(code);
     if (result === false) return res.send(CodeResponsesEnum.Incorrect_values_400);
-    if (result.errorsMessages) return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
+    if (typeof result !== "boolean") return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
     res.sendStatus(CodeResponsesEnum.No_content_204);
   }
 );
@@ -78,6 +78,6 @@ authRouter.post('/registration-email-resending', emailValidationMiddleware, asyn
 
   const result = await authService.resendEmail(email);
   if (result === false) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
-  if (result.errorsMessages) return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
+  if (typeof result !== "boolean") return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
