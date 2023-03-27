@@ -7,6 +7,7 @@ import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { emailValidationMiddleware, loginValidationMiddleware, passwordValidationMiddleware } from "./usersRouter";
 import { authService } from '../domains/authService';
 import { isUniqueEmail } from "../middlewares/isUniqueEmailMiddleware";
+import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 
 export const authRouter = Router({});
 
@@ -14,7 +15,9 @@ export const loginOrEmailValidationMiddleware = body("loginOrEmail").isString().
 
 export const codeValidationMiddleware = body("code").isString().trim().isLength({ min: 1, max: 500 }).withMessage("Incorrect value for code");
 
-const emailUniquenessValidationMiddleware = body("blogId").custom(isUniqueEmail);
+const emailUniquenessValidationMiddleware = body("email").custom(isUniqueEmail);
+
+const loginUniquenessValidationMiddleware = body("login").custom(isUniqueLogin);
 
 authRouter.post('/login',
   loginOrEmailValidationMiddleware,
@@ -41,6 +44,7 @@ authRouter.get('/me', jwtAuthMiddleware, async (req: Request, res: Response) => 
 
 authRouter.post('/registration',
   emailUniquenessValidationMiddleware,
+  loginUniquenessValidationMiddleware,
   loginValidationMiddleware,
   passwordValidationMiddleware,
   emailValidationMiddleware,
@@ -63,7 +67,8 @@ authRouter.post('/registration-confirmation',
     const code = req.body.code;
 
     const result = await authService.confirmEmail(code);
-    if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+    if (result === false) return res.send(CodeResponsesEnum.Incorrect_values_400);
+    if (result.errorsMessages) return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
     res.sendStatus(CodeResponsesEnum.No_content_204);
   }
 );
@@ -72,6 +77,7 @@ authRouter.post('/registration-email-resending', emailValidationMiddleware, asyn
   const email = req.body.email;
 
   const result = await authService.resendEmail(email);
-  if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+  if (result === false) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+  if (result.errorsMessages) return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });

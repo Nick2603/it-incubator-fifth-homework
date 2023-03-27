@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from 'uuid';
 import { usersRepository } from './../repositories/usersRepository';
 import { emailsManager } from "../utils/emailsManager";
 import { usersService } from "./usersService";
@@ -18,13 +19,29 @@ export const authService = {
     return true;
   },
 
-  async resendEmail(email: string): Promise<boolean> {
+  async resendEmail(email: string): Promise<any> {
+    const errors: any = { errorsMessages: [] };
+  
     const user = await usersRepository.getUserByEmail(email);
-    if (!user) return false;
-    if (user.emailConfirmation.isConfirmed) return false;
+    if (!user) {
+      return errors.errorsMessages.push({ message: "user is not found", field: "email" });
+    };
+  
+    if (user.emailConfirmation.isConfirmed) {
+      return errors.errorsMessages.push({ message: "email is already confirmed", field: "email" });
+    };
+
+    const newConfirmationCode = uuidv4();
 
     try {
-      await emailsManager.sendRegistrationConfirmationEmail(user.accountData.email, user.emailConfirmation.confirmationCode);
+      usersRepository.changeUserConfirmationCode(user._id, newConfirmationCode)
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+
+    try {
+      await emailsManager.sendRegistrationConfirmationEmail(user.accountData.email, newConfirmationCode);
     } catch (error) {
       console.error(error);
       return false;
@@ -33,12 +50,26 @@ export const authService = {
     return true;
   },
 
-  async confirmEmail(code: string): Promise<boolean> {
+  async confirmEmail(code: string): Promise<any> {
+    const errors: any = { errorsMessages: [] };
+  
     const user = await usersService.getUserByEmailConfirmationCode(code);
-    if (!user) return false;
-    if (user.emailConfirmation.isConfirmed) return false;
+
+    if (!user) {
+      return errors.errorsMessages.push({ message: "invalid code", field: "code" });
+    };
+
+    if (user.emailConfirmation.isConfirmed) {
+      return errors.errorsMessages.push({ message: "email is already confirmed", field: "code" });
+    };
+
     if (user.emailConfirmation.expirationDate < new Date()) return false;
     const result = await usersRepository.confirmEmail(user._id);
+
+    if (errors.errorsMessages.length) {
+      return errors;
+    };
+  
     return result;
   },
 
