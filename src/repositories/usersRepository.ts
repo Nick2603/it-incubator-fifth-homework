@@ -49,12 +49,12 @@ export const usersRepository = {
     return result.deletedCount === 1;
   },
 
-  async confirmEmail(userId: ObjectId) {
+  async confirmEmail(userId: ObjectId): Promise<boolean> {
     let result = await usersCollection.updateOne({ _id: userId }, { $set: { "emailConfirmation.isConfirmed": true } });
     return result.modifiedCount === 1;
   },
 
-  async changeUserConfirmationCode(userId: ObjectId, code: string) {
+  async changeUserConfirmationCode(userId: ObjectId, code: string): Promise<boolean> {
     let result = await usersCollection.updateOne({ _id: userId }, { $set: { "emailConfirmation.confirmationCode": code } });
     return result.modifiedCount === 1;
   },

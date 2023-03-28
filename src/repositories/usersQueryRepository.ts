@@ -1,5 +1,6 @@
 import { SortDirection } from "mongodb";
 import { usersCollection } from "../db";
+import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
 import { IUserDBModel, IUserViewModel } from "../types/IUser";
 import { QueryParamType } from "../types/QueryParamType";
 
@@ -54,12 +55,7 @@ export const usersQueryRepository = {
       page: +pageNumber,
       pageSize: +pageSize,
       totalCount,
-      items: users.map(user => ({
-        id: user._id,
-        login: user.accountData.login,
-        email: user.accountData.email,
-        createdAt: user.accountData.createdAt,
-      })),
-    }
+      items: users.map(mapUserDBTypeToViewType),
+    };
   },
 };
