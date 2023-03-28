@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { body, param } from "express-validator";
 import { commentsService } from "../domains/commentsService";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
-import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
+import { bearerAuthMiddleware } from "../middlewares/bearerAuthMiddleware";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 
 export const commentsRouter = Router({});
@@ -20,7 +20,7 @@ commentsRouter.get('/:commentId', async (req: Request, res: Response) => {
 });
 
 commentsRouter.put('/:commentId',
-  jwtAuthMiddleware,
+  bearerAuthMiddleware,
   contentValidationMiddleware,
   inputValidationMiddleware,
   async (req: Request, res: Response) => {
@@ -35,7 +35,7 @@ commentsRouter.put('/:commentId',
   }
 );
 
-commentsRouter.delete('/:commentId', jwtAuthMiddleware, async (req: Request, res: Response) => {
+commentsRouter.delete('/:commentId', bearerAuthMiddleware, async (req: Request, res: Response) => {
   const commentId = req.params.commentId;
   const userId = req.user!._id;
   const result = await commentsService.deleteComment(commentId, userId.toString());

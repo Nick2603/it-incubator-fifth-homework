@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { body } from "express-validator";
 import { jwtService } from "../application/jwtService";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
-import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
+import { bearerAuthMiddleware } from "../middlewares/bearerAuthMiddleware";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { emailValidationMiddleware, loginValidationMiddleware, passwordValidationMiddleware } from "./usersRouter";
 import { authService } from '../domains/authService';
@@ -38,7 +38,7 @@ authRouter.post('/login',
   }
 );
 
-authRouter.get('/me', jwtAuthMiddleware, async (req: Request, res: Response) => {
+authRouter.get('/me', bearerAuthMiddleware, async (req: Request, res: Response) => {
   res.send({ email: req.user!.accountData.email, login: req.user!.accountData.login, userId: req.user!._id });
 });
 

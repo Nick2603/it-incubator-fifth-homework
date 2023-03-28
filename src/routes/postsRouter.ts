@@ -6,7 +6,7 @@ import { inputValidationMiddleware } from "../middlewares/inputValidationMiddlew
 import { postsService } from "../domains/postsService";
 import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
 import { postsQueryRepository } from "../repositories/postsQueryRepository";
-import { jwtAuthMiddleware } from "../middlewares/jwtAuthMiddleware";
+import { bearerAuthMiddleware } from "../middlewares/bearerAuthMiddleware";
 import { contentValidationMiddleware } from "./commentsRouter";
 import { commentsService } from "../domains/commentsService";
 import { commentsQueryRepository } from "../repositories/commentsQueryRepository";
@@ -109,7 +109,7 @@ postsRouter.get('/:postId/comments', async (req: Request, res: Response) => {
 });
 
 postsRouter.post('/:postId/comments',
-  jwtAuthMiddleware,
+  bearerAuthMiddleware,
   contentValidationMiddleware,
   inputValidationMiddleware,
   async (req: Request, res: Response) => {
