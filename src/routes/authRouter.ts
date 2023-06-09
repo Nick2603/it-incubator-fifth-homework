@@ -32,9 +32,13 @@ authRouter.post('/login',
       res.sendStatus(CodeResponsesEnum.Unauthorized_401);
       return;
     }
-    
+
     const token = await jwtService.createJWT(user);
     res.status(CodeResponsesEnum.Ok_200).send(token);
+    
+    // const accessToken = await jwtService.createJWTAccessToken(user);
+    // const refreshToken = await jwtService.createJWTRefreshToken(user);
+    // res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
   }
 );
 
@@ -81,3 +85,12 @@ authRouter.post('/registration-email-resending', emailValidationMiddleware, asyn
   if (typeof result !== "boolean") return res.status(CodeResponsesEnum.Incorrect_values_400).send(result);
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
+
+// authRouter.post('/refresh-token', async(req: Request, res: Response) => {
+//   const refreshToken = req.cookies["refreshToken"];
+//   if (!refreshToken) {
+//     return res.status(401).send('Access Denied. No refresh token provided.');
+//   };
+
+
+// });
