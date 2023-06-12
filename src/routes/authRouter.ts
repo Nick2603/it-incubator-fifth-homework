@@ -129,6 +129,12 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
+  const isTokenInBlackList = await blackListRefreshTokensService.checkIfTokenInBlackList(refreshTokenFromReq);
+
+  if (isTokenInBlackList) {
+    return res.status(401).send('Access Denied. Incorrect refresh token provided.');
+  };
+
   await blackListRefreshTokensService.addRefreshTokenToBlackList(refreshTokenFromReq);
 
   res.sendStatus(CodeResponsesEnum.No_content_204);
