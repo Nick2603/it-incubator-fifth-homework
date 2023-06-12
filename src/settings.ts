@@ -10,6 +10,7 @@ import { usersRepository } from "./repositories/usersRepository";
 import { authRouter } from "./routes/authRouter";
 import { commentsRouter } from "./routes/commentsRouter";
 import { commentsRepository } from "./repositories/commentsRepository";
+import cookieParser from "cookie-parser";
 
 export const app = express();
 
@@ -18,6 +19,8 @@ const parserMiddleware = express.json();
 app.use(cors());
 
 app.use(parserMiddleware);
+
+app.use(cookieParser());
 
 app.delete('/testing/all-data', async (req: Request, res: Response) => {
   await blogsRepository.deleteAllBlogs();

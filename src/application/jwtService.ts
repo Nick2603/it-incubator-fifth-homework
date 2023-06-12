@@ -2,18 +2,13 @@ import jwt from "jsonwebtoken";
 import { IUserViewModel } from "../types/IUser";
 
 export const jwtService = {
-  async createJWT(user: IUserViewModel) {
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: "1h" });
-    return {
-      accessToken: token,
-    };
-  // async createJWTAccessToken(user: IUserViewModel) {
-  //   const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: "1h" });
-  //   return { accessToken };
-  // },
+  async createJWTAccessToken(user: IUserViewModel) {
+    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: 10 });
+    return { accessToken };
+  },
 
-  // async createJWTRefreshToken(user: IUserViewModel) {
-  //   return jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: "1d" });
+  async createJWTRefreshToken(user: IUserViewModel) {
+    return jwt.sign({ userId: user.id }, process.env.JWT_SECRET || "1", { expiresIn: 20 });
   },
 
   async getUserIdByToken(token: string) {

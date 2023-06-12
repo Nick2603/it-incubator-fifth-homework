@@ -8,6 +8,9 @@ import { emailValidationMiddleware, loginValidationMiddleware, passwordValidatio
 import { authService } from '../domains/authService';
 import { isUniqueEmail } from "../middlewares/isUniqueEmailMiddleware";
 import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
+import { usersService } from "../domains/usersService";
+import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
+import { blackListRefreshTokensService } from "../domains/blackListRefreshTokensService";
 
 export const authRouter = Router({});
 
@@ -32,13 +35,10 @@ authRouter.post('/login',
       res.sendStatus(CodeResponsesEnum.Unauthorized_401);
       return;
     }
-
-    const token = await jwtService.createJWT(user);
-    res.status(CodeResponsesEnum.Ok_200).send(token);
     
-    // const accessToken = await jwtService.createJWTAccessToken(user);
-    // const refreshToken = await jwtService.createJWTRefreshToken(user);
-    // res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
+    const accessToken = await jwtService.createJWTAccessToken(user);
+    const refreshToken = await jwtService.createJWTRefreshToken(user);
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
   }
 );
 
@@ -86,11 +86,50 @@ authRouter.post('/registration-email-resending', emailValidationMiddleware, asyn
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
 
-// authRouter.post('/refresh-token', async(req: Request, res: Response) => {
-//   const refreshToken = req.cookies["refreshToken"];
-//   if (!refreshToken) {
-//     return res.status(401).send('Access Denied. No refresh token provided.');
-//   };
+authRouter.post('/refresh-token', async(req: Request, res: Response) => {
+  const refreshTokenFromReq = req.cookies["refreshToken"];
+  if (!refreshTokenFromReq) {
+    return res.status(401).send('Access Denied. No refresh token provided.');
+  };
 
+  const userId = await jwtService.getUserIdByToken(refreshTokenFromReq);
+  if (!userId) {
+    return res.status(401).send('Access Denied. Incorrect refresh token provided.');
+  };
 
-// });
+  const isTokenInBlackList = await blackListRefreshTokensService.checkIfTokenInBlackList(refreshTokenFromReq);
+
+  if (isTokenInBlackList) {
+    return res.status(401).send('Access Denied. Incorrect refresh token provided.');
+  };
+
+  const dbUser = await usersService.getUserDBModelById(userId);
+
+  if (!dbUser) {
+    return res.status(401).send('User not found.');
+  };
+
+  const user = mapUserDBTypeToViewType(dbUser);
+
+  await blackListRefreshTokensService.addRefreshTokenToBlackList(refreshTokenFromReq);
+
+  const accessToken = await jwtService.createJWTAccessToken(user);
+  const refreshToken = await jwtService.createJWTRefreshToken(user);
+  res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
+});
+
+authRouter.post('/logout', async(req: Request, res: Response) => {
+  const refreshTokenFromReq = req.cookies["refreshToken"];
+  if (!refreshTokenFromReq) {
+    return res.status(401).send('Access Denied. No refresh token provided.');
+  };
+
+  const userId = await jwtService.getUserIdByToken(refreshTokenFromReq);
+  if (!userId) {
+    return res.status(401).send('Access Denied. Incorrect refresh token provided.');
+  };
+
+  await blackListRefreshTokensService.addRefreshTokenToBlackList(refreshTokenFromReq);
+
+  res.sendStatus(CodeResponsesEnum.No_content_204);
+});
