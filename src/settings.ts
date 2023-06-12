@@ -11,6 +11,7 @@ import { authRouter } from "./routes/authRouter";
 import { commentsRouter } from "./routes/commentsRouter";
 import { commentsRepository } from "./repositories/commentsRepository";
 import cookieParser from "cookie-parser";
+import { blackListRefreshTokensRepository } from "./repositories/blackListRefreshTokensRepository";
 
 export const app = express();
 
@@ -27,6 +28,7 @@ app.delete('/testing/all-data', async (req: Request, res: Response) => {
   await postsRepository.deleteAllPosts();
   await usersRepository.deleteAllUsers();
   await commentsRepository.deleteAllComments();
+  await blackListRefreshTokensRepository.deleteAllRefreshTokensInBlackList();
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
 

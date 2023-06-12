@@ -3,6 +3,10 @@ import { blackListRefreshTokensCollection } from "../db";
 import { IBlackListRefreshToken } from "../types/IBlackListRefreshToken";
 
 export const blackListRefreshTokensRepository = {
+  async deleteAllRefreshTokensInBlackList(): Promise<void> {
+    await blackListRefreshTokensCollection.deleteMany({});
+  },
+
   async getAllBlackListRefreshTokens(): Promise<IBlackListRefreshToken[]> {
     return await blackListRefreshTokensCollection.find({}).toArray();
   },
