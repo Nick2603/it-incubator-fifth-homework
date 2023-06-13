@@ -11,7 +11,9 @@ import { authRouter } from "./routes/authRouter";
 import { commentsRouter } from "./routes/commentsRouter";
 import { commentsRepository } from "./repositories/commentsRepository";
 import cookieParser from "cookie-parser";
-import { blackListRefreshTokensRepository } from "./repositories/usedRefreshTokensRepository";
+import { usedRefreshTokensRepository } from "./repositories/usedRefreshTokensRepository";
+import { sessionsRepository } from "./repositories/sessionsRepository";
+import { devicesRouter } from "./routes/devicesRouter";
 
 export const app = express();
 
@@ -23,12 +25,15 @@ app.use(parserMiddleware);
 
 app.use(cookieParser());
 
+app.set("trust proxy", true);
+
 app.delete('/testing/all-data', async (req: Request, res: Response) => {
   await blogsRepository.deleteAllBlogs();
   await postsRepository.deleteAllPosts();
   await usersRepository.deleteAllUsers();
   await commentsRepository.deleteAllComments();
-  await blackListRefreshTokensRepository.deleteAllRefreshTokensInBlackList();
+  await usedRefreshTokensRepository.deleteAllUsedRefreshTokens(); // delete
+  await sessionsRepository.deleteAllSessions();
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
 
@@ -37,3 +42,4 @@ app.use("/posts", postsRouter);
 app.use("/users", usersRouter);
 app.use("/auth", authRouter);
 app.use("/comments", commentsRouter);
+app.use("/security/devices", devicesRouter);

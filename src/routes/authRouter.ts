@@ -11,6 +11,7 @@ import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
 import { usedRefreshTokensService } from "../domains/usedRefreshTokensService";
+import { sessionsService } from "../domains/sessionsService";
 
 export const authRouter = Router({});
 
@@ -29,7 +30,9 @@ authRouter.post('/login',
   async (req: Request, res: Response) => {
     const loginOrEmail = req.body.loginOrEmail;
     const password = req.body.password;
-    const user = await authService.checkCredentials(loginOrEmail, password);    
+    const user = await authService.checkCredentials(loginOrEmail, password);
+    const { ip } = req;
+    const deviceTitle = req.headers["user-agent"] || "myDevice";
 
     if (!user) {
       res.sendStatus(CodeResponsesEnum.Unauthorized_401);
@@ -38,6 +41,9 @@ authRouter.post('/login',
     
     const accessToken = await jwtService.createJWTAccessToken(user);
     const refreshToken = await jwtService.createJWTRefreshToken(user);
+
+    await sessionsService.addSession(refreshToken, ip, deviceTitle, user.id.toString());
+
     res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
   }
 );
@@ -97,9 +103,9 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isTokenInBlackList = await usedRefreshTokensService.isUsedRefreshToken(refreshTokenFromReq);
+  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq, userId);
 
-  if (isTokenInBlackList) {
+  if (!isRefreshTokenInSession) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
@@ -111,10 +117,11 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
 
   const user = mapUserDBTypeToViewType(dbUser);
 
-  await usedRefreshTokensService.addRefreshTokenToUsed(refreshTokenFromReq);
-
   const accessToken = await jwtService.createJWTAccessToken(user);
   const refreshToken = await jwtService.createJWTRefreshToken(user);
+
+  await sessionsService.updateSession();
+
   res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
 });
 
@@ -129,13 +136,13 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isTokenInBlackList = await usedRefreshTokensService.isUsedRefreshToken(refreshTokenFromReq);
+  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq, userId);
 
-  if (isTokenInBlackList) {
+  if (!isRefreshTokenInSession) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  await usedRefreshTokensService.addRefreshTokenToUsed(refreshTokenFromReq);
+  await sessionsService.deleteSession(refreshTokenFromReq, userId);
 
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });

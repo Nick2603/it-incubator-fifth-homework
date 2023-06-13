@@ -2,7 +2,7 @@ import { InsertOneResult } from "mongodb";
 import { usedRefreshTokensCollection } from "../db";
 import { IUsedRefreshToken } from "../types/IUsedRefreshToken";
 
-export const usedRefreshTokensRepository = {
+export const usedRefreshTokensRepository = { // delete
   async deleteAllUsedRefreshTokens(): Promise<void> {
     await usedRefreshTokensCollection.deleteMany({});
   },

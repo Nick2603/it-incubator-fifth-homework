@@ -3,7 +3,7 @@ import { IUsedRefreshToken } from '../types/IUsedRefreshToken';
 import { usedRefreshTokensRepository } from '../repositories/usedRefreshTokensRepository';
 
 export const usedRefreshTokensService = {
-  async getAllUsedRefreshTokens(): Promise<IUsedRefreshToken[]> {
+  async getAllUsedRefreshTokens(): Promise<IUsedRefreshToken[]> { // delete
     return await usedRefreshTokensRepository.getAllUsedRefreshTokens();
   },
 
