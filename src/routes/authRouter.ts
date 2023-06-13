@@ -10,7 +10,7 @@ import { isUniqueEmail } from "../middlewares/isUniqueEmailMiddleware";
 import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
-import { blackListRefreshTokensService } from "../domains/blackListRefreshTokensService";
+import { usedRefreshTokensService } from "../domains/usedRefreshTokensService";
 
 export const authRouter = Router({});
 
@@ -97,7 +97,7 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isTokenInBlackList = await blackListRefreshTokensService.checkIfTokenInBlackList(refreshTokenFromReq);
+  const isTokenInBlackList = await usedRefreshTokensService.isUsedRefreshToken(refreshTokenFromReq);
 
   if (isTokenInBlackList) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
@@ -111,7 +111,7 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
 
   const user = mapUserDBTypeToViewType(dbUser);
 
-  await blackListRefreshTokensService.addRefreshTokenToBlackList(refreshTokenFromReq);
+  await usedRefreshTokensService.addRefreshTokenToUsed(refreshTokenFromReq);
 
   const accessToken = await jwtService.createJWTAccessToken(user);
   const refreshToken = await jwtService.createJWTRefreshToken(user);
@@ -129,13 +129,13 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isTokenInBlackList = await blackListRefreshTokensService.checkIfTokenInBlackList(refreshTokenFromReq);
+  const isTokenInBlackList = await usedRefreshTokensService.isUsedRefreshToken(refreshTokenFromReq);
 
   if (isTokenInBlackList) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  await blackListRefreshTokensService.addRefreshTokenToBlackList(refreshTokenFromReq);
+  await usedRefreshTokensService.addRefreshTokenToUsed(refreshTokenFromReq);
 
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });

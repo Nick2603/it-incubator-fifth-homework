@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 
-export interface IBlackListRefreshToken {
+export interface IUsedRefreshToken {
   _id: ObjectId;
   token: string;
 };

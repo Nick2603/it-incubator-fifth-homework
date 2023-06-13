@@ -4,7 +4,7 @@ import { IPost } from "./types/IPost";
 import * as dotenv from "dotenv";
 import { IUserDBModel } from "./types/IUser";
 import { IComment } from "./types/IComment";
-import { IBlackListRefreshToken } from "./types/IBlackListRefreshToken";
+import { IUsedRefreshToken } from "./types/IUsedRefreshToken";
 dotenv.config();
 
 const url = process.env.MONGO_URL;
@@ -20,7 +20,7 @@ export const blogsCollection = db.collection<IBlog>("blogs");
 export const postsCollection = db.collection<IPost>("posts");
 export const usersCollection = db.collection<IUserDBModel>("users");
 export const commentsCollection = db.collection<IComment>("comments");
-export const blackListRefreshTokensCollection = db.collection<IBlackListRefreshToken>("blackListRefreshTokens");
+export const usedRefreshTokensCollection = db.collection<IUsedRefreshToken>("usedRefreshTokens");
 
 export const runDb = async () => {
   try {

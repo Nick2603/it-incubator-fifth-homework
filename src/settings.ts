@@ -11,7 +11,7 @@ import { authRouter } from "./routes/authRouter";
 import { commentsRouter } from "./routes/commentsRouter";
 import { commentsRepository } from "./repositories/commentsRepository";
 import cookieParser from "cookie-parser";
-import { blackListRefreshTokensRepository } from "./repositories/blackListRefreshTokensRepository";
+import { blackListRefreshTokensRepository } from "./repositories/usedRefreshTokensRepository";
 
 export const app = express();
 
