@@ -16,11 +16,10 @@ devicesRouter.get('/', async (req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const sessions = sessionsService.getSessionsByUserId(userId);
+  const sessions = await sessionsService.getSessionsByUserId(userId);
 
   res.status(200).send(sessions);
 });
-
 
 devicesRouter.delete('/', async (req: Request, res: Response) => {
   const refreshTokenFromReq = req.cookies["refreshToken"];
