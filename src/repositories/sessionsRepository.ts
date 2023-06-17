@@ -16,12 +16,17 @@ export const sessionsRepository = {
   },
 
   async getAllSessionsByUserId(userId: string): Promise<ISessionDBModel[]> {
-    return await sessionsCollection.find({userId}).toArray();
+    console.log(userId, "userId in repo on get");
+    const r = await sessionsCollection.find({userId}).toArray();
+    console.log(r, "result in repo on get");
+    return r;
   },
 
   async deleteAllSessionsExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
-    // return await sessionsCollection.deleteMany({ userId, deviceId : { $ne: deviceId } });
-    return await sessionsCollection.deleteMany({ deviceId : { $ne: deviceId } });
+    console.log(deviceId, userId, "deviceId, userId in repo");
+    const r = await sessionsCollection.deleteMany({ $and: [{ userId }, { deviceId: { $ne: deviceId } }] });
+    console.log(r, "result of deleting in repo");
+    return r;
   },
 
   async deleteSessionByDeviceId(deviceId: string): Promise<DeleteResult> {

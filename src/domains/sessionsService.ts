@@ -6,6 +6,7 @@ import { mapSessionDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType c
 
 export const sessionsService = {
   async deleteAllSessionsExceptCurrent(tokenString: string, userId: string): Promise<DeleteResult> {
+    console.log(tokenString, userId, "tokenString, userId in service");
     const metadata = await jwtService.getRefreshTokenMetadata(tokenString);
     let deviceId: string = "";
 
@@ -13,7 +14,9 @@ export const sessionsService = {
       deviceId  = metadata.deviceId;
     }
   
-    return await sessionsRepository.deleteAllSessionsExceptCurrent(deviceId, userId);
+    const r = await sessionsRepository.deleteAllSessionsExceptCurrent(deviceId, userId);
+    console.log(r, "result of deleting in service");
+    return r;
   },
 
   async deleteSessionByDeviceId(deviceId: string, userId: string): Promise<string | boolean> {
@@ -28,8 +31,11 @@ export const sessionsService = {
   },
 
   async getSessionsByUserId(userId: string): Promise<ISessionViewModel[]> {
+    console.log(userId, "userId in service on get");
     const sessions = await sessionsRepository.getAllSessionsByUserId(userId);
-    return sessions.map((session) => mapSessionDBTypeToViewType(session));
+    const r =  sessions.map((session) => mapSessionDBTypeToViewType(session));
+    console.log(r, "sessions in service on get");
+    return r;
   },
 
   async addSession(token: string, ip: string, title: string, userId: string): Promise<InsertOneResult<ISessionDBModel>> {
