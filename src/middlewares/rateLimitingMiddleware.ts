@@ -1,7 +1,7 @@
 import rateLimit from "express-rate-limit"
 
 export const rateLimitingMiddleware = rateLimit({
-	windowMs: 1000 * 5,
+	windowMs: 1000 * 10,
 	max: 5,
 	message: "Too many attempts",
 	standardHeaders: true,
