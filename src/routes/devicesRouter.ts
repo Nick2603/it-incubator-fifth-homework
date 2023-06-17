@@ -7,7 +7,6 @@ export const devicesRouter = Router({});
 
 devicesRouter.get('/', async (req: Request, res: Response) => {
   const refreshTokenFromReq = req.cookies["refreshToken"];
-  console.log(refreshTokenFromReq, "refreshTokenFromReq in router on get");
   if (!refreshTokenFromReq) {
     return res.status(401).send('Access Denied. No refresh token provided.');
   };
@@ -18,7 +17,7 @@ devicesRouter.get('/', async (req: Request, res: Response) => {
   };
 
   const sessions = await sessionsService.getSessionsByUserId(userId);
-  console.log(sessions, "sessions in router on get");
+
   res.status(200).send(sessions);
 });
 
@@ -34,8 +33,6 @@ devicesRouter.delete('/', async (req: Request, res: Response) => {
   };
 
   const result = await sessionsService.deleteAllSessionsExceptCurrent(refreshTokenFromReq, userId);
-  console.log(refreshTokenFromReq, userId, "refreshTokenFromReq, userId in router");
-  console.log( result, "result of deleting in router");
   if (result) {
     res.sendStatus(CodeResponsesEnum.No_content_204);
     return;
