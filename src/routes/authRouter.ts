@@ -11,6 +11,7 @@ import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
 import { sessionsService } from "../domains/sessionsService";
+import { rateLimitingMiddleware } from "../middlewares/rateLimitingMiddleware";
 
 export const authRouter = Router({});
 
@@ -26,6 +27,7 @@ authRouter.post('/login',
   loginOrEmailValidationMiddleware,
   passwordValidationMiddleware,
   inputValidationMiddleware,
+  rateLimitingMiddleware,
   async (req: Request, res: Response) => {
     const loginOrEmail = req.body.loginOrEmail;
     const password = req.body.password;
@@ -58,6 +60,7 @@ authRouter.post('/registration',
   passwordValidationMiddleware,
   emailValidationMiddleware,
   inputValidationMiddleware,
+  rateLimitingMiddleware,
   async(req: Request, res: Response) => {
     const login = req.body.login;
     const email = req.body.email;
@@ -72,6 +75,7 @@ authRouter.post('/registration',
 authRouter.post('/registration-confirmation',
   codeValidationMiddleware,
   inputValidationMiddleware,
+  rateLimitingMiddleware,
   async(req: Request, res: Response) => {
     const code = req.body.code;
 
@@ -82,7 +86,7 @@ authRouter.post('/registration-confirmation',
   }
 );
 
-authRouter.post('/registration-email-resending', emailValidationMiddleware, async(req: Request, res: Response) => {
+authRouter.post('/registration-email-resending', emailValidationMiddleware, rateLimitingMiddleware, async(req: Request, res: Response) => {
   const email = req.body.email;
 
   const result = await authService.resendEmail(email);
