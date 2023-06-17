@@ -43,6 +43,8 @@ export const sessionsRepository = {
   },
 
   async deleteSession(deviceId: string, lastActiveDate: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteOne({ deviceId, lastActiveDate });
+    const r = await sessionsCollection.deleteOne({ deviceId, lastActiveDate });
+    console.log(r, "result of deleting on logout");
+    return r
   },
 };

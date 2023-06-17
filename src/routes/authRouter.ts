@@ -135,6 +135,7 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
 
 authRouter.post('/logout', async(req: Request, res: Response) => {
   const refreshTokenFromReq = req.cookies["refreshToken"];
+  console.log(refreshTokenFromReq);
   if (!refreshTokenFromReq) {
     return res.status(401).send('Access Denied. No refresh token provided.');
   };
