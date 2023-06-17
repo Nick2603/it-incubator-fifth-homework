@@ -8,14 +8,12 @@ export const sessionsService = {
   async deleteAllSessionsExceptCurrent(tokenString: string, userId: string): Promise<DeleteResult> {
     const metadata = await jwtService.getRefreshTokenMetadata(tokenString);
     let deviceId: string = "";
-    let issuedAt: string = "";
 
     if (metadata) {
-      issuedAt = metadata.issuedAt;
       deviceId  = metadata.deviceId;
     }
   
-    return await sessionsRepository.deleteAllSessionsExceptCurrent(deviceId, userId, issuedAt);
+    return await sessionsRepository.deleteAllSessionsExceptCurrent(deviceId, userId);
   },
 
   async deleteSessionByDeviceId(deviceId: string, userId: string): Promise<string | boolean> {
