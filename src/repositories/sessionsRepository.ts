@@ -20,7 +20,8 @@ export const sessionsRepository = {
   },
 
   async deleteAllSessionsExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteMany({ $and: [{ userId: userId }, { deviceId: { $ne: deviceId } }] });
+    // return await sessionsCollection.deleteMany({ userId, deviceId : { $ne: deviceId } });
+    return await sessionsCollection.deleteMany({ deviceId : { $ne: deviceId } });
   },
 
   async deleteSessionByDeviceId(deviceId: string): Promise<DeleteResult> {
