@@ -152,6 +152,6 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
   };
 
   await sessionsService.deleteSession(refreshTokenFromReq);
-
+  res.clearCookie("refreshToken");
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
