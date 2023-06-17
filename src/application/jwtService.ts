@@ -8,8 +8,8 @@ export const jwtService = {
     return { accessToken };
   },
 
-  async createJWTRefreshToken(user: IUserViewModel) {
-    return jwt.sign({ userId: user.id, deviceId: uuidv4(), issuedAt: new Date().getTime() }, process.env.JWT_SECRET || "1", { expiresIn: 20 });
+  async createJWTRefreshToken(user: IUserViewModel, deviceId?: string) {
+    return jwt.sign({ userId: user.id, deviceId: deviceId || uuidv4(), issuedAt: new Date().toISOString() }, process.env.JWT_SECRET || "1", { expiresIn: 20 });
   },
 
   async getUserIdByToken(token: string) {

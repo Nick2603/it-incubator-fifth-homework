@@ -11,6 +11,7 @@ import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
 import { sessionsService } from "../domains/sessionsService";
+import { createRateLimitingMiddleware } from "../middlewares/rateLimitingMiddleware";
 
 export const authRouter = Router({});
 
@@ -22,10 +23,16 @@ const emailUniquenessValidationMiddleware = body("email").custom(isUniqueEmail);
 
 const loginUniquenessValidationMiddleware = body("login").custom(isUniqueLogin);
 
+const loginRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+const registrationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+const registrationConfirmationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+const emailResendingRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+
 authRouter.post('/login',
   loginOrEmailValidationMiddleware,
   passwordValidationMiddleware,
   inputValidationMiddleware,
+  loginRateLimitingMiddleware,
   async (req: Request, res: Response) => {
     const loginOrEmail = req.body.loginOrEmail;
     const password = req.body.password;
@@ -58,6 +65,7 @@ authRouter.post('/registration',
   passwordValidationMiddleware,
   emailValidationMiddleware,
   inputValidationMiddleware,
+  registrationRateLimitingMiddleware,
   async(req: Request, res: Response) => {
     const login = req.body.login;
     const email = req.body.email;
@@ -72,6 +80,7 @@ authRouter.post('/registration',
 authRouter.post('/registration-confirmation',
   codeValidationMiddleware,
   inputValidationMiddleware,
+  registrationConfirmationRateLimitingMiddleware,
   async(req: Request, res: Response) => {
     const code = req.body.code;
 
@@ -82,7 +91,7 @@ authRouter.post('/registration-confirmation',
   }
 );
 
-authRouter.post('/registration-email-resending', emailValidationMiddleware, async(req: Request, res: Response) => {
+authRouter.post('/registration-email-resending', emailValidationMiddleware, emailResendingRateLimitingMiddleware, async(req: Request, res: Response) => {
   const email = req.body.email;
 
   const result = await authService.resendEmail(email);
@@ -116,8 +125,15 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
 
   const user = mapUserDBTypeToViewType(dbUser);
 
+  const metadata = await jwtService.getRefreshTokenMetadata(refreshTokenFromReq);
+  let deviceId: string = "";
+
+  if (metadata) {
+    deviceId  = metadata.deviceId;
+  }
+
   const accessToken = await jwtService.createJWTAccessToken(user);
-  const refreshToken = await jwtService.createJWTRefreshToken(user);
+  const refreshToken = await jwtService.createJWTRefreshToken(user, deviceId);
 
   await sessionsService.updateSession(refreshTokenFromReq, refreshToken);
 
@@ -142,6 +158,6 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
   };
 
   await sessionsService.deleteSession(refreshTokenFromReq);
-
+  res.clearCookie("refreshToken");
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });

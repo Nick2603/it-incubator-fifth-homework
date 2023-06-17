@@ -19,8 +19,8 @@ export const sessionsRepository = {
     return await sessionsCollection.find({userId}).toArray();
   },
 
-  async deleteAllSessionsExceptCurrent(deviceId: string, userId: string, lastActiveDate: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteMany({ deviceId, userId, lastActiveDate : { $ne: lastActiveDate } });
+  async deleteAllSessionsExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
+    return await sessionsCollection.deleteMany({ $and: [{ userId: userId }, { deviceId: { $ne: deviceId } }] });
   },
 
   async deleteSessionByDeviceId(deviceId: string): Promise<DeleteResult> {
