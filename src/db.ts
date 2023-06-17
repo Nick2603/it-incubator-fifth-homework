@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { MongoClient } from "mongodb";
 import { IBlog } from "./types/IBlog";
 import { IPost } from "./types/IPost";
@@ -25,9 +26,11 @@ export const sessionsCollection = db.collection<ISessionDBModel>("sessions");
 export const runDb = async () => {
   try {
     await client.connect();
+    await mongoose.connect(url);
     console.log("Connected");
   } catch (e) {
     console.log("Not connected");
     await client.close();
+    mongoose.connection.close()
   };
 };

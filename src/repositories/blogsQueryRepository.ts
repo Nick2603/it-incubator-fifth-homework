@@ -1,3 +1,4 @@
+import { Blog } from "../models/models"
 import { SortDirection } from "mongodb";
 import { blogsCollection } from "../db";
 import { IBlog } from "../types/IBlog";
@@ -28,7 +29,7 @@ export const blogsQueryRepository = {
     };
     
     const totalCount =  await blogsCollection.countDocuments(filter);
-    const blogs =  await blogsCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IBlog>({ _id: 0 }).toArray();
+    const blogs =  await Blog.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IBlog>({ _id: 0 }).toArray();
 
     return {
       pagesCount: Math.ceil(totalCount / +pageSize),
