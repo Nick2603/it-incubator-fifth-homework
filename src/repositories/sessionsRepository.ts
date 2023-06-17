@@ -24,7 +24,7 @@ export const sessionsRepository = {
 
   async deleteAllSessionsExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
     console.log(deviceId, userId, "deviceId, userId in repo");
-    const r = await sessionsCollection.deleteMany({ $and: [{ userId }, { deviceId: { $ne: deviceId } }] });
+    const r = await sessionsCollection.deleteMany({ $and: [{ userId: userId }, { deviceId: { $ne: deviceId } }] });
     console.log(r, "result of deleting in repo");
     return r;
   },
