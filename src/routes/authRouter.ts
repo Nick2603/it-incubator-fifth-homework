@@ -125,8 +125,15 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
 
   const user = mapUserDBTypeToViewType(dbUser);
 
+  const metadata = await jwtService.getRefreshTokenMetadata(refreshTokenFromReq);
+  let deviceId: string = "";
+
+  if (metadata) {
+    deviceId  = metadata.deviceId;
+  }
+
   const accessToken = await jwtService.createJWTAccessToken(user);
-  const refreshToken = await jwtService.createJWTRefreshToken(user);
+  const refreshToken = await jwtService.createJWTRefreshToken(user, deviceId);
 
   await sessionsService.updateSession(refreshTokenFromReq, refreshToken);
 
