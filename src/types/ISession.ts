@@ -1,7 +1,14 @@
-export interface ISession {
+export interface ISessionDBModel {
   ip:	string;
   title: string;
   lastActiveDate:	string;
   deviceId:	string;
   userId: string;
+};
+
+export interface ISessionViewModel {
+  ip:	string;
+  title: string;
+  lastActiveDate:	string;
+  deviceId:	string;
 };

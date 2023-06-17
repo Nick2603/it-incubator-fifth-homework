@@ -1,14 +1,10 @@
-import { DeleteResult, InsertOneResult, WithId } from "mongodb";
-import { ISession } from "../types/ISession";
+import { DeleteResult, InsertOneResult } from "mongodb";
+import { ISessionDBModel, ISessionViewModel } from "../types/ISession";
 import { sessionsRepository } from "../repositories/sessionsRepository";
 import { jwtService } from "../application/jwtService";
-import { CodeResponsesEnum } from "../types/CodeResponsesEnum";
+import { mapSessionDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType copy";
 
 export const sessionsService = {
-  async getAllSessions(): Promise<ISession[]> {
-    return await sessionsRepository.getAllSessions();
-  },
-
   async deleteAllSessionsExceptCurrent(tokenString: string, userId: string): Promise<DeleteResult> {
     const metadata = await jwtService.getRefreshTokenMetadata(tokenString);
     let deviceId: string = "";
@@ -22,22 +18,23 @@ export const sessionsService = {
     return await sessionsRepository.deleteAllSessionsExceptCurrent(deviceId, userId, issuedAt);
   },
 
-  async deleteSessionByDeviceId(deviceId: string, userId: string): Promise<CodeResponsesEnum | boolean> {
+  async deleteSessionByDeviceId(deviceId: string, userId: string): Promise<string | boolean> {
     const session = await sessionsRepository.getSessionByDeviceId(deviceId);
 
     if (session && session.userId !== userId) {
-      return CodeResponsesEnum.Forbidden_403;
+      return "Forbidden";
     };
 
     const result = await sessionsRepository.deleteSessionByDeviceId(deviceId);
     return result.deletedCount === 1;
   },
 
-  async getSessionsByUserId(userId: string): Promise<ISession[]> {
-    return await sessionsRepository.getAllSessionsByUserId(userId);
+  async getSessionsByUserId(userId: string): Promise<ISessionViewModel[]> {
+    const sessions = await sessionsRepository.getAllSessionsByUserId(userId);
+    return sessions.map((session) => mapSessionDBTypeToViewType(session));
   },
 
-  async addSession(token: string, ip: string, title: string, userId: string): Promise<InsertOneResult<ISession>> {
+  async addSession(token: string, ip: string, title: string, userId: string): Promise<InsertOneResult<ISessionDBModel>> {
     const metadata = await jwtService.getRefreshTokenMetadata(token);
     let deviceId: string = "";
     let issuedAt: string = "";
@@ -58,7 +55,7 @@ export const sessionsService = {
     return await sessionsRepository.addSession(session);
   },
 
-  async isRefreshTokenInSession(tokenString: string, userId: string): Promise<boolean> {
+  async isRefreshTokenInSession(tokenString: string): Promise<boolean> {
     const allTokens = await sessionsRepository.getAllSessions();
 
     const metadata = await jwtService.getRefreshTokenMetadata(tokenString);
@@ -70,16 +67,30 @@ export const sessionsService = {
       deviceId  = metadata.deviceId;
     }
 
-    const match = allTokens.find(t => t.deviceId === deviceId && t.lastActiveDate === issuedAt && t.userId === userId);
+    const match = allTokens.find(t => t.deviceId === deviceId && t.lastActiveDate === issuedAt);
 
     return Boolean(match);
   },
 
-  async updateSession(tokenString: string, userId: string, previousLastActiveDate: string, newLastActiveDate: string): Promise<boolean> {
-    return await sessionsRepository.updateSession(deviceId, newLastActiveDate);
+  async updateSession(oldTokenString: string, newTokenString: string): Promise<boolean> {
+    const oldMetadata = await jwtService.getRefreshTokenMetadata(oldTokenString);
+    const newMetadata = await jwtService.getRefreshTokenMetadata(newTokenString);
+
+    let oldDeviceId: string = "";
+    let newIssuedAt: string = "";
+
+    if (oldMetadata) {
+      oldDeviceId = oldMetadata.deviceId;
+    }
+
+    if (newMetadata) {
+      newIssuedAt = newMetadata.issuedAt;
+    }
+
+    return await sessionsRepository.updateSession(oldDeviceId, newIssuedAt);
   },
 
-  async deleteSession(tokenString: string, userId: string): Promise<DeleteResult> {
+  async deleteSession(tokenString: string): Promise<DeleteResult> {
     const metadata = await jwtService.getRefreshTokenMetadata(tokenString);
     let deviceId: string = "";
     let issuedAt: string = "";
@@ -89,6 +100,6 @@ export const sessionsService = {
       deviceId  = metadata.deviceId;
     }
   
-    return await sessionsRepository.deleteSession(deviceId, userId, issuedAt);
+    return await sessionsRepository.deleteSession(deviceId, issuedAt);
   },
 };

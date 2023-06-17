@@ -1,21 +1,21 @@
 import { DeleteResult, InsertOneResult, WithId } from "mongodb";
 import { sessionsCollection } from "../db";
-import { ISession } from "../types/ISession";
+import { ISessionDBModel } from "../types/ISession";
 
 export const sessionsRepository = { 
   async deleteAllSessions(): Promise<DeleteResult> {
     return await sessionsCollection.deleteMany({});
   },
 
-  async getAllSessions(): Promise<ISession[]> {
+  async getAllSessions(): Promise<ISessionDBModel[]> {
     return await sessionsCollection.find({}).toArray();
   },
 
-  async getSessionByDeviceId(deviceId: string): Promise<WithId<ISession> | null> {
+  async getSessionByDeviceId(deviceId: string): Promise<WithId<ISessionDBModel> | null> {
     return await sessionsCollection.findOne({deviceId});
   },
 
-  async getAllSessionsByUserId(userId: string): Promise<ISession[]> {
+  async getAllSessionsByUserId(userId: string): Promise<ISessionDBModel[]> {
     return await sessionsCollection.find({userId}).toArray();
   },
 
@@ -27,16 +27,16 @@ export const sessionsRepository = {
     return await sessionsCollection.deleteOne({deviceId});
   },
 
-  async addSession(session: ISession): Promise<InsertOneResult<ISession>> {
+  async addSession(session: ISessionDBModel): Promise<InsertOneResult<ISessionDBModel>> {
     return await sessionsCollection.insertOne(session);
   },
 
-  async updateSession(deviceId: string, newLastActiveDate: string): Promise<boolean> {
-    const result = await sessionsCollection.updateOne({ deviceId }, { $set: { lastActiveDate: newLastActiveDate }});
+  async updateSession(deviceId: string, newIssuedAt: string): Promise<boolean> {
+    const result = await sessionsCollection.updateOne({ deviceId }, { $set: { lastActiveDate: newIssuedAt }});
     return result.matchedCount === 1;
   },
 
-  async deleteSession(deviceId: string, userId: string, lastActiveDate: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteOne({ deviceId, userId, lastActiveDate });
+  async deleteSession(deviceId: string, lastActiveDate: string): Promise<DeleteResult> {
+    return await sessionsCollection.deleteOne({ deviceId, lastActiveDate });
   },
 };

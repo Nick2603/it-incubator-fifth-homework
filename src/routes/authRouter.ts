@@ -10,7 +10,6 @@ import { isUniqueEmail } from "../middlewares/isUniqueEmailMiddleware";
 import { isUniqueLogin } from "../middlewares/isUniqueLoginMiddleware";
 import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
-import { usedRefreshTokensService } from "../domains/usedRefreshTokensService";
 import { sessionsService } from "../domains/sessionsService";
 
 export const authRouter = Router({});
@@ -103,7 +102,7 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq, userId);
+  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq);
 
   if (!isRefreshTokenInSession) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
@@ -120,7 +119,7 @@ authRouter.post('/refresh-token', async(req: Request, res: Response) => {
   const accessToken = await jwtService.createJWTAccessToken(user);
   const refreshToken = await jwtService.createJWTRefreshToken(user);
 
-  await sessionsService.updateSession();
+  await sessionsService.updateSession(refreshTokenFromReq, refreshToken);
 
   res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, maxAge: 20 }).status(CodeResponsesEnum.Ok_200).send(accessToken);
 });
@@ -136,13 +135,13 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq, userId);
+  const isRefreshTokenInSession = sessionsService.isRefreshTokenInSession(refreshTokenFromReq);
 
   if (!isRefreshTokenInSession) {
     return res.status(401).send('Access Denied. Incorrect refresh token provided.');
   };
 
-  await sessionsService.deleteSession(refreshTokenFromReq, userId);
+  await sessionsService.deleteSession(refreshTokenFromReq);
 
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });

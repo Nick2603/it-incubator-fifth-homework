@@ -59,7 +59,7 @@ devicesRouter.delete('/:deviceId', async (req: Request, res: Response) => {
     return;
   };
 
-  if (result === CodeResponsesEnum.Forbidden_403) {
+  if (result === "Forbidden") {
     res.sendStatus(CodeResponsesEnum.Forbidden_403);
     return;
   };
