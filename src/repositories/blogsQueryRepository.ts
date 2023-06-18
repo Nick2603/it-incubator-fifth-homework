@@ -1,8 +1,7 @@
-import { Blog } from "../models/models"
-import { SortDirection } from "mongodb";
-import { blogsCollection } from "../db";
+import { BlogModel } from "../models/blogModel"
 import { IBlog } from "../types/IBlog";
 import { QueryParamType } from "../types/QueryParamType";
+import { SortOrder } from "mongoose";
 
 type BlogsWithMetaType = {
   pagesCount: number,
@@ -25,11 +24,11 @@ export const blogsQueryRepository = {
     const filter: any = {};
     
     if (searchNameTerm) {
-      filter.name = { $regex: `(?i)${searchNameTerm}(?-i)` };
+      filter.name = { $regex: searchNameTerm, $options: "i" };
     };
     
-    const totalCount =  await blogsCollection.countDocuments(filter);
-    const blogs =  await Blog.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IBlog>({ _id: 0 }).toArray();
+    const totalCount =  await BlogModel.countDocuments(filter);
+    const blogs =  await BlogModel.find(filter, { _id: 0 }).sort({ [sortBy.toString()]: sortDirection as SortOrder }).skip((+pageNumber - 1) * +pageSize).limit(+pageSize);
 
     return {
       pagesCount: Math.ceil(totalCount / +pageSize),

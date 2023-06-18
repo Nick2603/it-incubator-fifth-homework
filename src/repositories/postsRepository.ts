@@ -1,29 +1,28 @@
-import { InsertOneResult } from "mongodb";
-import { postsCollection } from "../db";
 import { IPost } from "../types/IPost";
 import { blogsRepository } from "./blogsRepository";
+import { PostModel } from "../models/postModel";
 
 export const postsRepository = {
   async deleteAllPosts(): Promise<void> {
-    await postsCollection.deleteMany({});
+    await PostModel.deleteMany({});
   },
 
   async getPostById(id: string): Promise<IPost | null> {
-    return await postsCollection.findOne({ id }, { projection: { _id: 0 }});
+    return await PostModel.findOne({ _id: id }, { "__v": 0 });
   },
 
-  async createPost(newPost: IPost): Promise<InsertOneResult<IPost>> {
-    return await postsCollection.insertOne(newPost);
+  async createPost(newPost: IPost): Promise<IPost> {
+    return await PostModel.create(newPost);
   },
 
   async updatePost(id: string, title: string, shortDescription: string, content: string, blogId: string): Promise<boolean> {
     const blog = await blogsRepository.getBlogById(blogId);
-    const result = await postsCollection.updateOne({ id }, { $set: { title, shortDescription, content, blogId, blogName: blog!.name }});
+    const result = await PostModel.updateOne({ _id: id }, { title, shortDescription, content, blogId, blogName: blog!.name });
     return result.matchedCount === 1;
   },
 
   async deletePost(id: string): Promise<boolean> {
-    const result = await postsCollection.deleteOne({ id })
+    const result = await PostModel.deleteOne({ _id: id })
     return result.deletedCount === 1;
   },
 };

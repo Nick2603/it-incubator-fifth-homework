@@ -1,14 +1,11 @@
-import { ObjectId } from "mongodb";
-
-interface ICommentatorInfo {
+export interface ICommentatorInfo {
   userId: string;
   userLogin: string;
 };
 
 export interface IComment {
-  _id?: ObjectId;
-  postId?: string;
   id: string;
+  postId?: string;
   content: string;
   commentatorInfo: ICommentatorInfo;
   createdAt: string;

@@ -55,7 +55,7 @@ authRouter.post('/login',
 );
 
 authRouter.get('/me', bearerAuthMiddleware, async (req: Request, res: Response) => {
-  res.send({ email: req.user!.accountData.email, login: req.user!.accountData.login, userId: req.user!._id });
+  res.send({ email: req.user!.accountData.email, login: req.user!.accountData.login, userId: req.user!.id });
 });
 
 authRouter.post('/registration',

@@ -1,42 +1,42 @@
-import { DeleteResult, InsertOneResult, WithId } from "mongodb";
-import { sessionsCollection } from "../db";
+import { DeleteResult, WithId } from "mongodb";
 import { ISessionDBModel } from "../types/ISession";
+import { SessionModel } from "../models/sessionModel";
 
 export const sessionsRepository = { 
   async deleteAllSessions(): Promise<DeleteResult> {
-    return await sessionsCollection.deleteMany({});
+    return await SessionModel.deleteMany({});
   },
 
   async getAllSessions(): Promise<ISessionDBModel[]> {
-    return await sessionsCollection.find({}).toArray();
+    return await SessionModel.find({});
   },
 
   async getSessionByDeviceId(deviceId: string): Promise<WithId<ISessionDBModel> | null> {
-    return await sessionsCollection.findOne({deviceId});
+    return await SessionModel.findOne({deviceId});
   },
 
   async getAllSessionsByUserId(userId: string): Promise<ISessionDBModel[]> {
-    return await sessionsCollection.find({userId}).toArray();
+    return await SessionModel.find({userId});
   },
 
   async deleteAllSessionsExceptCurrent(deviceId: string, userId: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteMany({ $and: [{ userId: userId }, { deviceId: { $ne: deviceId } }] });
+    return await SessionModel.deleteMany({ $and: [{ userId: userId }, { deviceId: { $ne: deviceId } }] });
   },
 
   async deleteSessionByDeviceId(deviceId: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteOne({deviceId});
+    return await SessionModel.deleteOne({deviceId});
   },
 
-  async addSession(session: ISessionDBModel): Promise<InsertOneResult<ISessionDBModel>> {
-    return await sessionsCollection.insertOne(session);
+  async addSession(session: ISessionDBModel): Promise<ISessionDBModel> {
+    return await SessionModel.create(session);
   },
 
   async updateSession(deviceId: string, newIssuedAt: string): Promise<boolean> {
-    const result = await sessionsCollection.updateOne({ deviceId }, { $set: { lastActiveDate: newIssuedAt }});
+    const result = await SessionModel.updateOne({ deviceId }, { lastActiveDate: newIssuedAt });
     return result.matchedCount === 1;
   },
 
   async deleteSession(deviceId: string, lastActiveDate: string): Promise<DeleteResult> {
-    return await sessionsCollection.deleteOne({ deviceId, lastActiveDate });
+    return await SessionModel.deleteOne({ deviceId, lastActiveDate });
   },
 };

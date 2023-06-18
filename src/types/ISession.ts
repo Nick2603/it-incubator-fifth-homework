@@ -1,4 +1,5 @@
 export interface ISessionDBModel {
+  id: string;
   ip:	string;
   title: string;
   lastActiveDate:	string;
