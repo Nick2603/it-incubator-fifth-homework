@@ -1,61 +1,47 @@
-import { InsertOneResult, ObjectId } from "mongodb";
-import { usersCollection } from "../db";
 import { IUserDBModel } from "../types/IUser";
+import { UserModel } from "../models/userModel";
 
 export const usersRepository = {
   async deleteAllUsers(): Promise<void> {
-    await usersCollection.deleteMany({});
+    await UserModel.deleteMany({});
   },
 
   async getUserById(id: string): Promise<IUserDBModel | null> {
-    let userId: any;
-    try {
-      userId = new ObjectId(id);
-    } catch (error) {
-      return null;
-    };
-    
-    return usersCollection.findOne({ _id: userId });
+    return UserModel.findOne({ _id: id }, { "__v": 0 });
   },
 
   async getUserByEmailConfirmationCode(code: string): Promise<IUserDBModel | null> {  
-    return usersCollection.findOne({ "emailConfirmation.confirmationCode": code });
+    return UserModel.findOne({ "emailConfirmation.confirmationCode": code });
   },
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<IUserDBModel | null> {
-    return await usersCollection.findOne({ $or: [{ "accountData.email": loginOrEmail }, { "accountData.login": loginOrEmail }]});
+    return await UserModel.findOne({ $or: [{ "accountData.email": loginOrEmail }, { "accountData.login": loginOrEmail }]});
   },
 
   async getUserByEmail(email: string): Promise<IUserDBModel | null> {  
-    return usersCollection.findOne({ "accountData.email": email });
+    return UserModel.findOne({ "accountData.email": email });
   },
 
   async getUserByLogin(login: string): Promise<IUserDBModel | null> {  
-    return usersCollection.findOne({ "accountData.login": login });
+    return UserModel.findOne({ "accountData.login": login });
   },
 
-  async createUser(newUser: IUserDBModel): Promise<InsertOneResult<IUserDBModel>> {
-    return await usersCollection.insertOne(newUser);
+  async createUser(newUser: IUserDBModel): Promise<IUserDBModel> {
+    return await UserModel.create(newUser);
   },
 
   async deleteUser(id: string): Promise<boolean> {
-    let userId: any;
-    try {
-      userId = new ObjectId(id);
-    } catch (error) {
-      return false;
-    };
-    const result = await usersCollection.deleteOne({ _id: userId })
+    const result = await UserModel.deleteOne({ _id: id })
     return result.deletedCount === 1;
   },
 
-  async confirmEmail(userId: ObjectId): Promise<boolean> {
-    let result = await usersCollection.updateOne({ _id: userId }, { $set: { "emailConfirmation.isConfirmed": true } });
+  async confirmEmail(id: string): Promise<boolean> {
+    let result = await UserModel.updateOne({ _id: id }, { "emailConfirmation.isConfirmed": true });
     return result.modifiedCount === 1;
   },
 
-  async changeUserConfirmationCode(userId: ObjectId, code: string): Promise<boolean> {
-    let result = await usersCollection.updateOne({ _id: userId }, { $set: { "emailConfirmation.confirmationCode": code } });
+  async changeUserConfirmationCode(id: string, code: string): Promise<boolean> {
+    let result = await UserModel.updateOne({ _id: id }, { "emailConfirmation.confirmationCode": code });
     return result.modifiedCount === 1;
   },
 };

@@ -1,23 +1,25 @@
-import { ObjectId } from "mongodb";
-
-export interface IUserViewModel{
-  id: ObjectId;
+export interface IUserViewModel {
+  id: string;
   login: string;
   email: string;
   createdAt: string;
 };
 
-export interface IUserDBModel{
-  _id: ObjectId,
-  accountData: {
-    login: string;
-    email: string;
-    password: string;
-    createdAt: string;
-  },
-  emailConfirmation: {
-    confirmationCode: string;
-    expirationDate: Date;
-    isConfirmed: boolean;
-  },
+export interface IAccountData {
+  login: string;
+  email: string;
+  password: string;
+  createdAt: string;
+}
+
+export interface IEmailConfirmation {
+  confirmationCode: string;
+  expirationDate: Date;
+  isConfirmed: boolean;
+}
+
+export interface IUserDBModel {
+  id: string,
+  accountData: IAccountData,
+  emailConfirmation: IEmailConfirmation,
 };

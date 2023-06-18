@@ -1,7 +1,7 @@
 import { IComment } from './../types/IComment';
-import { commentsCollection } from "../db";
 import { QueryParamType } from '../types/QueryParamType';
-import { SortDirection } from 'mongodb';
+import { CommentModel } from '../models/commentModel';
+import { SortOrder } from 'mongoose';
 
 type CommentsWithMetaType = {
   pagesCount: number,
@@ -19,8 +19,8 @@ export const commentsQueryRepository = {
       filter.postId = postId;
     };
 
-    const totalCount =  await commentsCollection.countDocuments(filter);
-    const comments = await commentsCollection.find(filter).sort(sortBy.toString(), sortDirection as SortDirection).skip((+pageNumber - 1) * +pageSize).limit(+pageSize).project<IComment>({ _id: 0, postId: 0 }).toArray();
+    const totalCount =  await CommentModel.countDocuments(filter);
+    const comments = await CommentModel.find(filter, { _id: 0, postId: 0 }).sort({ [sortBy.toString()]: sortDirection as SortOrder }).skip((+pageNumber - 1) * +pageSize).limit(+pageSize);
 
     return {
       pagesCount: Math.ceil(totalCount / +pageSize),

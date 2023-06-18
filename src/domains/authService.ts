@@ -38,7 +38,7 @@ export const authService = {
     const newConfirmationCode = uuidv4();
 
     try {
-      usersRepository.changeUserConfirmationCode(user._id, newConfirmationCode)
+      usersRepository.changeUserConfirmationCode(user.id, newConfirmationCode)
     } catch (error) {
       console.error(error);
       return false;
@@ -74,7 +74,7 @@ export const authService = {
       return errors;
     };
 
-    const result = await usersRepository.confirmEmail(user._id);
+    const result = await usersRepository.confirmEmail(user.id);
   
     return result;
   },
@@ -91,7 +91,7 @@ export const authService = {
     };
   
     return {
-      id: user._id,
+      id: user.id,
       login: user.accountData.login,
       email: user.accountData.email,
       createdAt: user.accountData.createdAt,

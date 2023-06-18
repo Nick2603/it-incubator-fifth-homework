@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
-import { ObjectId } from "mongodb";
 import { usersRepository } from "../repositories/usersRepository";
 import { IUserViewModel, IUserDBModel } from "../types/IUser";
 import { authService } from "./authService";
@@ -22,7 +21,7 @@ export const usersService = {
     const passwordHash = await authService.getHashedPassword(password);
   
     const newUser: IUserDBModel = {
-      _id: new ObjectId(),
+      id: uuidv4(),
       accountData: {
         login,
         email,
@@ -39,7 +38,7 @@ export const usersService = {
     await usersRepository.createUser(newUser);
 
     let savedUser: IUserViewModel & { password?: string; code?: string; } = {
-      id: newUser._id,
+      id: newUser.id,
       login: newUser.accountData.login,
       email: newUser.accountData.email,
       createdAt: newUser.accountData.createdAt,

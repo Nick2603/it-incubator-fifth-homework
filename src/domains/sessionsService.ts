@@ -1,4 +1,5 @@
-import { DeleteResult, InsertOneResult } from "mongodb";
+import { v4 as uuidv4 } from 'uuid';
+import { DeleteResult } from "mongodb";
 import { ISessionDBModel, ISessionViewModel } from "../types/ISession";
 import { sessionsRepository } from "../repositories/sessionsRepository";
 import { jwtService } from "../application/jwtService";
@@ -32,7 +33,7 @@ export const sessionsService = {
     return sessions.map((session) => mapSessionDBTypeToViewType(session));
   },
 
-  async addSession(token: string, ip: string, title: string, userId: string): Promise<InsertOneResult<ISessionDBModel>> {
+  async addSession(token: string, ip: string, title: string, userId: string): Promise<ISessionDBModel> {
     const metadata = await jwtService.getRefreshTokenMetadata(token);
     let deviceId: string = "";
     let issuedAt: string = "";
@@ -43,6 +44,7 @@ export const sessionsService = {
     }
 
     const session = {
+      id: uuidv4(),
       ip,
       title,
       lastActiveDate:	issuedAt,

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { body, param } from "express-validator";
+import { body } from "express-validator";
 import { commentsService } from "../domains/commentsService";
 import { inputValidationMiddleware } from "../middlewares/inputValidationMiddleware";
 import { bearerAuthMiddleware } from "../middlewares/bearerAuthMiddleware";
@@ -26,7 +26,7 @@ commentsRouter.put('/:commentId',
   async (req: Request, res: Response) => {
     const commentId = req.params.commentId;
     const content = req.body.content;
-    const userId = req.user!._id.toString();
+    const userId = req.user!.id;
 
     const result = await commentsService.updateComment(commentId, content, userId);
     if (result === "Not found") return res.sendStatus(CodeResponsesEnum.Not_found_404);
@@ -37,7 +37,7 @@ commentsRouter.put('/:commentId',
 
 commentsRouter.delete('/:commentId', bearerAuthMiddleware, async (req: Request, res: Response) => {
   const commentId = req.params.commentId;
-  const userId = req.user!._id;
+  const userId = req.user!.id;
   const result = await commentsService.deleteComment(commentId, userId.toString());
   if (result === "Not found") return res.sendStatus(CodeResponsesEnum.Not_found_404);
   if (result === "Forbidden") return res.sendStatus(CodeResponsesEnum.Forbidden_403);
