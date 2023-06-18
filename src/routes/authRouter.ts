@@ -12,6 +12,8 @@ import { usersService } from "../domains/usersService";
 import { mapUserDBTypeToViewType } from "../mappers/mapUserDBTypeToViewType";
 import { sessionsService } from "../domains/sessionsService";
 import { createRateLimitingMiddleware } from "../middlewares/rateLimitingMiddleware";
+import { recoveryCodesService } from "../domains/recoveryCodesService";
+import { usersRepository } from "../repositories/usersRepository";
 
 export const authRouter = Router({});
 
@@ -27,6 +29,8 @@ const loginRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 const registrationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 const registrationConfirmationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 const emailResendingRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+const passwordRecoveryRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
+const newPasswordReqRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 
 authRouter.post('/login',
   loginOrEmailValidationMiddleware,
@@ -161,3 +165,38 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
   res.clearCookie("refreshToken");
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
+
+authRouter.post("/password-recovery",
+  emailValidationMiddleware,
+  passwordRecoveryRateLimitingMiddleware,
+  async(req: Request, res: Response) => {
+    const email = req.body.email;
+
+    await recoveryCodesService.addRecoveryCode(email);
+
+    res.sendStatus(CodeResponsesEnum.No_content_204);
+  }
+);
+
+authRouter.post("/new-password",
+  passwordValidationMiddleware,
+  newPasswordReqRateLimitingMiddleware,
+  async(req: Request, res: Response) => {
+    const newPassword = req.body.newPassword;
+    const recoveryCode = req.body.recoveryCode;
+
+    const validCode = await recoveryCodesService.validateRecoveryCode(recoveryCode);
+
+    if (!validCode) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+
+    const user = await usersRepository.getUserByEmail(validCode.email);
+
+    if (!user) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+
+    const result = usersService.updateUserPassword(user.id, newPassword);
+
+    if (!result) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+
+    res.sendStatus(CodeResponsesEnum.No_content_204);
+  }
+);

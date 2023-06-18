@@ -64,4 +64,10 @@ export const usersService = {
   async deleteUser(id: string): Promise<boolean> {
     return await usersRepository.deleteUser(id);
   },
+
+  async updateUserPassword(id: string, password: string): Promise<boolean> {
+    const passwordHash = await authService.getHashedPassword(password);
+
+    return await usersRepository.updateUserPassword(id, passwordHash);
+  },
 };

@@ -44,4 +44,9 @@ export const usersRepository = {
     let result = await UserModel.updateOne({ _id: id }, { "emailConfirmation.confirmationCode": code });
     return result.modifiedCount === 1;
   },
+
+  async updateUserPassword(id: string, password: string): Promise<boolean> {
+    const result = await UserModel.updateOne({ _id: id }, { "accountData.password": password });
+    return result.matchedCount === 1;
+  }
 };

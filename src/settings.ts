@@ -13,6 +13,7 @@ import { commentsRepository } from "./repositories/commentsRepository";
 import cookieParser from "cookie-parser";
 import { sessionsRepository } from "./repositories/sessionsRepository";
 import { devicesRouter } from "./routes/devicesRouter";
+import { recoveryCodesRepository } from "./repositories/recoveryCodesRepository";
 
 export const app = express();
 
@@ -32,6 +33,7 @@ app.delete('/testing/all-data', async (req: Request, res: Response) => {
   await usersRepository.deleteAllUsers();
   await commentsRepository.deleteAllComments();
   await sessionsRepository.deleteAllSessions();
+  await recoveryCodesRepository.deleteAllRecoveryCodes();
   res.sendStatus(CodeResponsesEnum.No_content_204);
 });
 
