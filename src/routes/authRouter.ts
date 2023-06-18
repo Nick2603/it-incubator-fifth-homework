@@ -169,6 +169,7 @@ authRouter.post('/logout', async(req: Request, res: Response) => {
 authRouter.post("/password-recovery",
   emailValidationMiddleware,
   passwordRecoveryRateLimitingMiddleware,
+  inputValidationMiddleware,
   async(req: Request, res: Response) => {
     const email = req.body.email;
 
@@ -181,13 +182,14 @@ authRouter.post("/password-recovery",
 authRouter.post("/new-password",
   passwordValidationMiddleware,
   newPasswordReqRateLimitingMiddleware,
+  inputValidationMiddleware,
   async(req: Request, res: Response) => {
     const newPassword = req.body.newPassword;
     const recoveryCode = req.body.recoveryCode;
 
     const validCode = await recoveryCodesService.validateRecoveryCode(recoveryCode);
 
-    if (!validCode) return res.sendStatus(CodeResponsesEnum.Incorrect_values_400);
+    if (!validCode) return res.status(400).send({ errorsMessages: [{ message: "incorrect value for recoveryCode", field: "recoveryCode" }] });
 
     const user = await usersRepository.getUserByEmail(validCode.email);
 
