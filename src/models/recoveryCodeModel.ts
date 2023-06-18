@@ -6,6 +6,7 @@ import { IRecoveryCode } from '../types/IRecoveryCode';
 const RecoveryCodeSchema = new Schema<WithId<IRecoveryCode>>({
   _id: { type: String, required: true, immutable: true, alias: "id", default: uuidv4 },
   recoveryCode: { type: String, required: true },
+  email: { type: String, required: true },
 });
 
 RecoveryCodeSchema.set('toJSON', {

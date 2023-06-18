@@ -8,7 +8,7 @@ export const recoveryCodesRepository = {
   },
 
   async getRecoveryCode(code: string): Promise<WithId<IRecoveryCode> | null> {
-    return await RecoveryCodeModel.findOne({code});
+    return await RecoveryCodeModel.findOne({ recoveryCode: code });
   },
 
   async deleteRecoveryCode(id: string): Promise<DeleteResult> {

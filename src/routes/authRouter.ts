@@ -25,6 +25,8 @@ const emailUniquenessValidationMiddleware = body("email").custom(isUniqueEmail);
 
 const loginUniquenessValidationMiddleware = body("login").custom(isUniqueLogin);
 
+export const newPasswordValidationMiddleware = body("newPassword").isString().trim().isLength({ min: 6, max: 20 }).withMessage("Incorrect value for password");
+
 const loginRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 const registrationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
 const registrationConfirmationRateLimitingMiddleware = createRateLimitingMiddleware(1000 * 10, 5);
@@ -180,7 +182,7 @@ authRouter.post("/password-recovery",
 );
 
 authRouter.post("/new-password",
-  passwordValidationMiddleware,
+  newPasswordValidationMiddleware,
   newPasswordReqRateLimitingMiddleware,
   inputValidationMiddleware,
   async(req: Request, res: Response) => {
